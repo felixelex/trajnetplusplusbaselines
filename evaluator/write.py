@@ -114,7 +114,7 @@ def main(args=None):
             ## Goal file must be present in 'goal_files/test_private' folder
             ## Goal file must have the same name as corresponding test file
             if goal_flag:
-                print("Loading Test Goals file")
+                print("Loading Test Goals file at goal_files/test_private/" + dataset +'.pkl')
                 goal_dict = pickle.load(open('goal_files/test_private/' + dataset +'.pkl', "rb"))
                 all_goals[dataset] = {s_id: [goal_dict[path[0].pedestrian] for path in s] for _, s_id, s in scenes}
 

@@ -21,7 +21,7 @@ def main():
 
     ## TODO Configure Writing images
     # if args.output is None:
-    #     args.output = args.dataset_file
+    #     args.output = args.dataset_files
 
     ## Read GT Scenes
     reader = Reader(args.dataset_files[0], scene_type='paths')
