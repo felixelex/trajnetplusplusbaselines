@@ -6,7 +6,6 @@ goal_files/
 
 DATA_BLOCK/
 output/
-OUTPUT_BLOCK/
 socialforce-master/
 profile_trace*.json
 Python-RVO2-master/
@@ -19,7 +18,6 @@ evaluator/old_table/
 evaluator/nll.py
 	
 *.txt
-*.png
 *.sh
 *.run
 *.pt
