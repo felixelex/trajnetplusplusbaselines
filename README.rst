@@ -1,4 +1,35 @@
-# Hey guys! :)
+Milestone 1: Getting Started
+============================
+
+**Group B:** Paula Vogg, Danya Li, Felix Hoppe
+
+In this readme, we present the results of our insightful struggle through the first part of the DLAV project. 
+
+
+Ressources
+----------
+
+Tutorial: `Link <https://thedebugger811.github.io/posts/2021/04/milestone_1/>`_  
+
+Trajnet++ Baselines Repository: `Link <https://github.com/vita-epfl/trajnetplusplusbaselines/>`_  
+
+Approach
+--------
+
+Here is what we did: 
+
+* In a first step, we went through the setup process on our local machine. We trained some simple models (vanilla LSTM, directional LSTM) on a small data set (five_parallel_synth_split). Furthermore, we evaluated these models and plotted statistics and predictions.
+* In a second step, we went once more through the setup process, but this time on the EPFL SCITAS server. After becomming Masters of the command line, we managed to run the same training jobs as we did previously on our local machine - showing that everything works just fine.
+* Next, we trained a number of models on different data. We used both our local machines as well as SCITAS to run these trainings. A list of all trained models can be found in the *Results* section.
+* In a next step, we evaluated the different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Results*.
+* Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
+
+Results
+-------
+
+[well, this part we still have to write later :D]
+
+
 
 
 
