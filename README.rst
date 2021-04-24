@@ -1,4 +1,17 @@
-# Hey guys! :)
+Milestone 1: Getting Started
+============================
+
+**Group B:** Paula Vogg, Danya Li, Felix Hoppe
+
+In this readme, we present the results of our insightful struggle through the first part of the DLAV project. 
+
+
+Ressources
+----------
+
+Tutorial: `Link <https://thedebugger811.github.io/posts/2021/04/milestone_1/>`_
+
+
 
 
 
