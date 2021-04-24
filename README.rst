@@ -27,9 +27,27 @@ Here is what we did:
 Results
 -------
 
-[well, this part we still have to write later :D]
+Motivated as we are, we trained the following models (organized by training data set):
 
+*five_parallel_synth*
 
+- vanilla (danya, paula)
+- directional (danya, paula)
+
+*synth_data*
+
+- vanilla (danya)
+- directional (danya)
+- attentionmlp (danya still running) 
+
+*real_data*
+
+- vanilla (felix) 
+- directional (paula still running) 
+- attentionmlp (felix, currently running)
+
+*real_data_noCFF* (subset of real_data)
+- attentionmlp (felix, currently running)
 
 
 
