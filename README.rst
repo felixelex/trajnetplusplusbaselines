@@ -9,13 +9,15 @@ In this readme, we present the results of our insightful struggle through the fi
 Ressources
 ----------
 
-Tutorial: `Link <https://thedebugger811.github.io/posts/2021/04/milestone_1/>`_
-Trajnet++ Baselines Repository: `Link <https://github.com/vita-epfl/trajnetplusplusbaselines/>`_
+Tutorial: `Link <https://thedebugger811.github.io/posts/2021/04/milestone_1/>`_  
+
+Trajnet++ Baselines Repository: `Link <https://github.com/vita-epfl/trajnetplusplusbaselines/>`_  
 
 Approach
 --------
 
 Here is what we did: 
+
 * In a first step, we went through the setup process on our local machine. We trained some simple models (vanilla LSTM, directional LSTM) on a small data set (five_parallel_synth_split). Furthermore, we evaluated these models and plotted statistics and predictions.
 * In a second step, we went once more through the setup process, but this time on the EPFL SCITAS server. After becomming Masters of the command line, we managed to run the same training jobs as we did previously on our local machine - showing that everything works just fine.
 * Next, we trained a number of models on different data. We used both our local machines as well as SCITAS to run these trainings. A list of all trained models can be found in the *Results* section.
