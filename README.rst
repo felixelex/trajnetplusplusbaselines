@@ -24,6 +24,12 @@ Here is what we did:
 * In a next step, we evaluated the different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Results*.
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
+Results
+-------
+
+[well, this part we still have to write later :D]
+
+
 
 
 
