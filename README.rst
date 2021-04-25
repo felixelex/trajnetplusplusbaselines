@@ -95,7 +95,14 @@ Models trained on **real_data_noCFF** data
 
 
 All models have been tested on the *five_parallel_synth/test_private* data. 
-Test: wenn ich hier was schreibe, gehen dann deine Änderungen nicht verloren?
+
+Average Displacement Error (**ADE**): Average L2 distance between the ground truth and prediction of the primary pedestrian over all predicted time steps. Lower is better.
+
+Final Displacement Error (**FDE**): The L2 distance between the final ground truth coordinates and the final prediction coordinates of the primary pedestrian. Lower is better
+
+Prediction Collision (**Col-I**): Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The model prediction of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
+
+Ground Truth Collision (**Col-II**): Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The ground truth of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
 
 
 Visualizing predictions
