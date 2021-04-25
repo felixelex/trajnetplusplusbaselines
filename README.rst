@@ -128,7 +128,7 @@ SCENE ID: 43906
 
     <img src="trained_models/figures/fps-visualize.scene43906.png" width="400px">
 
-*real_data*
+*real_data_noCFF*
 
 .. raw:: html
 
@@ -149,7 +149,7 @@ SCENE ID: 46845
 
    <img src="trained_models/figures/fps-visualize.scene46845.png" width="400px">
 
-*real_data*
+*real_data_noCFF*
 
 .. raw:: html
 
