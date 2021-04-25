@@ -57,11 +57,15 @@ Motivated as we are, we trained the following models (organized by training data
 Training statistics
 -------------------
 
+.. raw:: html
+
+    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png" height="200px">
+    
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
-  :width: 50%
+  :width: 200px
 
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
-  :width: 50%
+  :width: 200px
 
 Considering the two plots above, we can note several things:
 
