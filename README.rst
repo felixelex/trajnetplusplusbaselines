@@ -76,6 +76,8 @@ Evaluation
 
 Models trained on **five_parallel_synth** data
 
+<img src="trained_models/five_parallel_synth/Results_cropped.png" alt="drawing" width="100"/>
+
 .. figure:: trained_models/five_parallel_synth/Results_cropped.png
   :width: 400
 
