@@ -78,17 +78,17 @@ Considering the two plots above, we can note several things:
 Evaluation
 ----------
 
-Models trained on **five_parallel_synth** data
+Models trained on **five_parallel_synth (fps)** data
 
 .. figure:: trained_models/five_parallel_synth/Results_cropped.png
   :width: 400
 
-Models trained on **synth_data** data
+Models trained on **synth_data (sd)** data
 
 .. figure:: trained_models/synth_data/Results_cropped.png
   :width: 400
 
-Models trained on **real_data_noCFF** data
+Models trained on **real_data_noCFF (rd)** data
 
 .. figure:: trained_models/real_data_noCFF/Results_cropped.png
   :width: 400
@@ -103,6 +103,10 @@ Final Displacement Error (**FDE**): The L2 distance between the final ground tru
 Prediction Collision (**Col-I**): Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The model prediction of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
 
 Ground Truth Collision (**Col-II**): Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The ground truth of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
+
+**Interpretation of results:**
+
+
 
 
 Visualizing predictions
@@ -139,6 +143,7 @@ SCENE ID: 46845
 
    <img src="trained_models/figures/sd-visualize.scene46845.png" width="400px">
 
+**Interpretation of results:**
 
 
 AICrowd submission
