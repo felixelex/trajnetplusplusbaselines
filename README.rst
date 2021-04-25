@@ -24,7 +24,7 @@ Here is what we did:
 * In a next step, we evaluated the different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Results*.
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
-Our trained models and their result visualizations are placed at `./trained_models`.
+Our trained models and result visualizations are placed at `./trained_models`.
 
 Results
 =======
@@ -39,8 +39,8 @@ Motivated as we are, we trained the following models (organized by training data
 *synth_data*
 
 - vanilla 
-- directional 
-- attentionmlp (canceled, took too long) 
+- directional (with goals)
+- attentionmlp (with goals)
 
 *real_data*
  
@@ -72,6 +72,7 @@ Considering the two plots above, we can note several things:
 - The loss decreases for all models. This implies that all models are able to learn from the data.
 - There is a jump in the performance improvement after epoch 10. This coincides with the scheduled decrease of the learning rate after epoch 10. The second learning rate decrease after epoch 20 has no major effect.
 - The standard deviation of the loss function remains quite large throughout the training.
+- No matter which dataset is used, modes considering interaction between pedestrains always have lower loss. 
 
 
 
@@ -106,7 +107,7 @@ Ground Truth Collision (**Col-II**): Calculates the percentage of collisions of 
 
 **Interpretation of results:**
 
-In the comparison of the two different kinds of models (with or without interaction encoder), the errors for predictions using the vanilla model are much higher compared to using a directional model. This makes sens, because the vanilla model does not take into account the interaction between pedestrians, whereas the model using a directional interaction encoder considers the interaction between pedestrians. Therefore it is logical that for all three data sets, we have lower errors for the model using a interaction encoder. These interaction encoders were either 'directional' or on the training with real data we tested also the 'attention MLP' encoder. 
+In the comparison of the two different kinds of models (with or without interaction encoder), the errors for predictions using the vanilla model are much higher compared to using a directional model. This makes sense, because the vanilla model does not take into account the interaction between pedestrians, whereas the model using a directional interaction encoder considers the interaction between pedestrians. Therefore it is logical that for all three data sets, we have lower errors for the model using a interaction encoder. These interaction encoders were either 'directional' or on the training with real data we tested also the 'attention MLP' encoder. 
 
 Having a look at the difference of using a directional or an attention MLP encoder in the real dataset we can see that the performance is very similar. Although training took a lot longer for the attention MLP model. 
 
