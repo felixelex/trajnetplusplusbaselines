@@ -59,11 +59,11 @@ Training statistics
 
 .. raw:: html
 
-    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png" width="600px">
+    <img src="trained_models/figures/lstm_attentionmlp_None.pkl.log.epoch-loss.png" width="600px">
 
 .. raw:: html
 
-    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.train.png" width="600px">
+    <img src="trained_models/figures/lstm_attentionmlp_None.pkl.log.train.png" width="600px">
     
 
 Considering the two plots above, we can note several things:
@@ -89,9 +89,6 @@ Models trained on **synth_data** data
   :width: 400
 
 Models trained on **real_data_noCFF** data
-
-.. figure:: trained_models/real_data/Results_cropped.png
-  :width: 400
 
 .. figure:: trained_models/real_data_noCFF/Results_cropped.png
   :width: 400
