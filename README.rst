@@ -106,6 +106,11 @@ Ground Truth Collision (**Col-II**): Calculates the percentage of collisions of 
 
 **Interpretation of results:**
 
+In the comparison of the two different kinds of models (with or without interaction encoder), the errors for predictions using the vanilla model are much higher compared to using a directional model. This makes sens, because the vanilla model does not take into account the interaction between pedestrians, whereas the model using a directional interaction encoder considers the interaction between pedestrians. Therefore it is logical that for all three data sets, we have lower errors for the model using a interaction encoder. These interaction encoders were either 'directional' or on the training with real data we tested also the 'attention MLP' encoder. 
+
+Having a look at the difference of using a directional or an attention MLP encoder in the real dataset we can see that the performance is very similar. Although training took a lot longer for the attention MLP model. Therefore the directional model (which even has the smaller errors) is recommanded. 
+
+Comparing the Col-I and the Col-II errors, we observe a much higher error for the colision testing Col-II. Col-II is looking at the collision of the predicted way of pedestrians with the groundtruth, whereas the Col-I takes into account only the prediction within the model. Therefore it makes sense that there are more errors when comparing to the groundtruth and the low error of Col-I means that our model still has a good performance because it understood that it needs to avoid pedestrian's collision.
 
 
 
@@ -149,7 +154,7 @@ SCENE ID: 46845
 AICrowd submission
 ==================
 
-Our AICrowd submission can be found here: `Link <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/132434/>`_
+Our AICrowd submission can be found here: `Link <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/132435>`_
 
 
 
