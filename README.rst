@@ -58,10 +58,10 @@ Training statistics
 -------------------
 
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
-  :width: 100px
+  :width: 50%
 
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
-  :width: 100px
+  :width: 50%
 
 Considering the two plots above, we can note several things:
 
