@@ -41,21 +41,42 @@ Motivated as we are, we trained the following models (organized by training data
 - attentionmlp (canceled, took too long) 
 
 *real_data*
-
-- vanilla 
+ 
 - attentionmlp (canceled, took too long)
 
 *real_data_noCFF* (subset of real_data)
 
-- directional (paula) 
-- attentionmlp (felix)
+- vanilla
+- directional
+- attentionmlp
 
 Evaluation
 ----------
 
-Models trained on five_parallel_synth data
-.. image:: trained_models/five_parallel_synth/Results_cropped.png
+Models trained on **five_parallel_synth** data
+
+.. figure:: trained_models/five_parallel_synth/Results_cropped.png
   :width: 400
+
+
+Models trained on **synth_data** data
+
+.. figure:: trained_models/synth_data/Results_cropped.png
+  :width: 400
+
+Models trained on **real_data** data
+
+.. figure:: trained_models/real_data/Results_cropped.png
+  :width: 400
+
+Models trained on **real_data_noCFF** data
+
+.. figure:: trained_models/real_data_noCFF/Results_cropped.png
+  :width: 400
+
+
+
+
 
 
 
