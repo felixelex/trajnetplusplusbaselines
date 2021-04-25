@@ -24,7 +24,7 @@ Here is what we did:
 * In a next step, we evaluated the different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Results*.
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
-Our trained models and their result visualizations are placed at `./trained_models`.
+Our trained models and result visualizations are placed at `./trained_models`.
 
 Results
 =======
@@ -39,8 +39,8 @@ Motivated as we are, we trained the following models (organized by training data
 *synth_data*
 
 - vanilla 
-- directional 
-- attentionmlp (canceled, took too long) 
+- directional (with goals)
+- attentionmlp (with goals)
 
 *real_data*
  
@@ -72,30 +72,47 @@ Considering the two plots above, we can note several things:
 - The loss decreases for all models. This implies that all models are able to learn from the data.
 - There is a jump in the performance improvement after epoch 10. This coincides with the scheduled decrease of the learning rate after epoch 10. The second learning rate decrease after epoch 20 has no major effect.
 - The standard deviation of the loss function remains quite large throughout the training.
+- No matter which dataset is used, models considering interaction between pedestrains always have lower loss. 
 
 
 
 Evaluation
 ----------
 
-Models trained on **five_parallel_synth** data
+Models trained on **five_parallel_synth (fps)** data
 
 .. figure:: trained_models/five_parallel_synth/Results_cropped.png
   :width: 400
 
-Models trained on **synth_data** data
+Models trained on **synth_data (sd)** data
 
 .. figure:: trained_models/synth_data/Results_cropped.png
   :width: 400
 
-Models trained on **real_data_noCFF** data
+Models trained on **real_data_noCFF (rd)** data
 
 .. figure:: trained_models/real_data_noCFF/Results_cropped.png
   :width: 400
 
 
 All models have been tested on the *five_parallel_synth/test_private* data. 
-Test: wenn ich hier was schreibe, gehen dann deine Änderungen nicht verloren?
+
+Average Displacement Error (**ADE**): Average L2 distance between the ground truth and prediction of the primary pedestrian over all predicted time steps. Lower is better.
+
+Final Displacement Error (**FDE**): The L2 distance between the final ground truth coordinates and the final prediction coordinates of the primary pedestrian. Lower is better
+
+Prediction Collision (**Col-I**): Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The model prediction of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
+
+Ground Truth Collision (**Col-II**): Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The ground truth of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
+
+**Interpretation of results:**
+
+In the comparison of the two different kinds of models (with or without interaction encoder), the errors for predictions using the vanilla model are much higher compared to using a directional model. This makes sense, because the vanilla model does not take into account the interaction between pedestrians, whereas the model using a directional interaction encoder considers the interaction between pedestrians. Therefore it is logical that for all three data sets, we have lower errors for the model using a interaction encoder. These interaction encoders were either 'directional' or on the training with real data we tested also the 'attention MLP' encoder. 
+
+Having a look at the difference of using a directional or an attention MLP encoder in the real dataset we can see that the performance is very similar. Although training took a lot longer for the attention MLP model. 
+
+Comparing the Col-I and the Col-II errors, we observe a much higher error for the colision testing Col-II in the case of the interaction encoder models. Col-II is looking at the collision of the predicted way of pedestrians with the groundtruth, whereas the Col-I takes into account only the prediction within the model. Therefore it makes sense that there are more errors when comparing to the groundtruth and the low error of Col-I means that our model still has a good performance because it understood that it needs to avoid pedestrian's collision. For the vanilla model both errors Col-I and Col-II are high, this means that the model is really bad in avoiding collisions, which makes sens because it does not take into account interactions. 
+
 
 
 Visualizing predictions
@@ -105,13 +122,19 @@ Below, predictions of trained models in 2 different situations are shown:
 
 SCENE ID: 43906
 
+*five_parallel_synth*
+
 .. raw:: html
 
     <img src="trained_models/figures/fps-visualize.scene43906.png" width="400px">
 
+*real_data_noCFF*
+
 .. raw:: html
 
     <img src="trained_models/figures/no-visualize.scene43906.png" width="400px">
+
+*synth_data*
 
 .. raw:: html
 
@@ -120,24 +143,55 @@ SCENE ID: 43906
     
 SCENE ID: 46845
 
+*five_parallel_synth*
+
 .. raw:: html
 
    <img src="trained_models/figures/fps-visualize.scene46845.png" width="400px">
-    
+
+*real_data_noCFF*
+
 .. raw:: html
 
    <img src="trained_models/figures/no-visualize.scene46845.png" width="400px">
 
+*synth_data*
+
 .. raw:: html
 
    <img src="trained_models/figures/sd-visualize.scene46845.png" width="400px">
+   
+   
+SCENE ID: 48031
+
+*five_parallel_synth*
+
+.. raw:: html
+
+   <img src="trained_models/figures/fps-visualize.scene48031.png" width="400px">
+
+*real_data_noCFF*
+
+.. raw:: html
+
+   <img src="trained_models/figures/rd_no-visualize.scene48031.png" width="400px">
+
+*synth_data*
+
+.. raw:: html
+
+   <img src="trained_models/figures/sd-visualize.scene48031.png" width="400px">
 
 
+**Interpretation of results:**
+
+For the visualisation we took the trained models and tested them on the test dataset available for the *five_parallel_synth* dataset. This might explain why the models which were trained on other datasets (*synth_data* and *real_data*) perform not as good as the models trained on the *five_parallel_synth* dataset. Furthermore we can observe that the predictions made by a D-Grid model (with interaction encoder) are anticipitating better the actual trajectory. In the case of the model trained on the *real_data* it is possible that the lack of goal information (we do not know where pedestrians want to go) makes it more difficult to do proper predictions. 
 
 AICrowd submission
 ==================
 
-Our AICrowd submission can be found here [LINK]
+Our AICrowd submission can be found here: `Link <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/132435>`_
+
 
 
 
