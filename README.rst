@@ -18,10 +18,10 @@ Approach
 
 Here is what we did: 
 
-* In a first step, we went through the setup process on our local machine. We trained some simple models (vanilla LSTM, directional LSTM) on a small data set (five_parallel_synth_split). Furthermore, we evaluated these models and plotted statistics and predictions.
-* In a second step, we went once more through the setup process, but this time on the EPFL SCITAS server. After becomming Masters of the command line, we managed to run the same training jobs as we did previously on our local machine - showing that everything works just fine.
-* Next, we trained a number of models on different data. We used both our local machines as well as SCITAS to run these trainings. A list of all trained models can be found in the *Results* section.
-* In a next step, we evaluated the different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Results*.
+* In the first step, we went through the setup process on our local machine. We trained some simple models (vanilla LSTM, directional LSTM) on a small data set (five_parallel_synth_split). Furthermore, we evaluated these models and plotted statistics and predictions.
+* In the second step, we went once more through the setup process, but this time on the EPFL SCITAS server. After becomming Masters of the command line, we managed to run the same training jobs as we did previously on our local machine - showing that everything works just fine.
+* Next, we trained a number of models on different data sets. We used both our local machines as well as SCITAS to run these trainings. A list of all trained models can be found in the *Training model list* section.
+* In the next step, we evaluated different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Evaluation and Results*.
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
 Our trained models and result visualizations are placed at *./trained_models*.
@@ -73,7 +73,7 @@ Considering the two plots above, we can note several things:
 - The loss decreases for all models. This implies that all models are able to learn from the data.
 - There is a jump in the performance improvement after epoch 10. This coincides with the scheduled decrease of the learning rate after epoch 10. The second learning rate decrease after epoch 20 has no major effect.
 - The standard deviation of the loss function remains quite large throughout the training.
-- No matter which dataset is used, models considering interaction between pedestrains always have lower loss. 
+- No matter which dataset is used, models considering interaction between pedestrains always have lower loss than the vanilla ones. 
 
 
 
@@ -82,7 +82,7 @@ Evaluation and Results
 
 All models have been tested on the *five_parallel_synth/test_private* data.
 
-Overall results analyses 
+Overall results analysis
 ------------------------
 
 Models trained on **five_parallel_synth (fps)** data
@@ -116,7 +116,7 @@ In the comparison of the two different kinds of models (with or without interact
 
 Having a look at the difference of using a directional or an attention MLP encoder in the real dataset we can see that the performance is very similar. Although training took a lot longer for the attention MLP model. 
 
-Comparing the Col-I and the Col-II errors, we observe a much higher error for the colision testing Col-II in the case of the interaction encoder models. Col-II is looking at the collision of the predicted way of pedestrians with the groundtruth, whereas the Col-I takes into account only the prediction within the model. Therefore it makes sense that there are more errors when comparing to the groundtruth and the low error of Col-I means that our model still has a good performance because it understood that it needs to avoid pedestrian's collision. For the vanilla model both errors Col-I and Col-II are high, this means that the model is really bad in avoiding collisions, which makes sens because it does not take into account interactions. 
+Comparing the Col-I and the Col-II errors, we observe a much higher error for the colision testing Col-II in the case of the interaction encoder models. Col-II is looking at the collision of the predicted way of pedestrians with the groundtruth, whereas the Col-I takes into account only the prediction within the model. Therefore it makes sense that there are more errors when comparing to the groundtruth and the low error of Col-I means that our model still has a good performance because it understood that it needs to avoid pedestrian's collision. For the vanilla model both errors Col-I and Col-II are high, this means that the model is really bad in avoiding collisions, which makes sense because it does not take into account interactions. 
 
 
 
@@ -190,7 +190,7 @@ SCENE ID: 48031
 
 **Interpretation of results:**
 
-For the visualisation we took the trained models and tested them on the test dataset available for the *five_parallel_synth* dataset. This might explain why the models which were trained on other datasets (*synth_data* and *real_data*) perform not as good as the models trained on the *five_parallel_synth* dataset. Furthermore we can observe that the predictions made by a D-Grid model (with interaction encoder) are anticipitating better the actual trajectory. In the case of the model trained on the *real_data* it is possible that the lack of goal information (we do not know where pedestrians want to go) makes it more difficult to do proper predictions. 
+For the visualisation we took the trained models and tested them on *five_parallel_synth* dataset which has all available goal files. This might explain why those models trained on other datasets (*synth_data* and *real_data*) perform not as good as the models trained on *five_parallel_synth* dataset. This can also be seen from *Overall result analysis* above. Furthermore we can observe that the predictions made by a D-Grid model (with interaction encoder) are anticipitating better the actual trajectory. In the case of the model trained on the *real_data* it is possible that the lack of goal information (we do not know where pedestrians want to go) makes it more difficult to do the proper predictions. 
 
 AICrowd submission
 ==================
