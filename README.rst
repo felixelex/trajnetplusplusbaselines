@@ -101,6 +101,18 @@ Test: wenn ich hier was schreibe, gehen dann deine Änderungen nicht verloren?
 Visualizing predictions
 -----------------------
 
+* - .. figure:: trained_models/figures/fps-visualize.scene46845.png
+
+       Fig 1. fps
+
+  - .. figure:: trained_models/figures/no-visualize.scene46845.png
+
+       Fig 2. rd_n0
+
+  - .. figure:: trained_models/figures/sd-visualize.scene46845.png
+  
+       Fig 3. sd
+       
 Below, predictions of trained models in 2 different situations are shown:
 
 SCENE ID: 43906
