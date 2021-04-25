@@ -82,6 +82,9 @@ Evaluation and Results
 
 All models have been tested on the *five_parallel_synth/test_private* data.
 
+Overall results analyses 
+------------------------
+
 Models trained on **five_parallel_synth (fps)** data
 
 .. figure:: trained_models/five_parallel_synth/Results_cropped.png
@@ -97,7 +100,7 @@ Models trained on **real_data_noCFF (rd)** data
 .. figure:: trained_models/real_data_noCFF/Results_cropped.png
   :width: 400 
 
-**Metrics** 
+**Metrics:** 
 
 Average Displacement Error (**ADE**): Average L2 distance between the ground truth and prediction of the primary pedestrian over all predicted time steps. Lower is better.
 
@@ -107,8 +110,7 @@ Prediction Collision (**Col-I**): Calculates the percentage of collisions of pri
 
 Ground Truth Collision (**Col-II**): Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The ground truth of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
 
-Interpretation of results
---------------------------
+**Interpretation of results:**
 
 In the comparison of the two different kinds of models (with or without interaction encoder), the errors for predictions using the vanilla model are much higher compared to using a directional model. This makes sense, because the vanilla model does not take into account the interaction between pedestrians, whereas the model using a directional interaction encoder considers the interaction between pedestrians. Therefore it is logical that for all three data sets, we have lower errors for the model using a interaction encoder. These interaction encoders were either 'directional' or on the training with real data we tested also the 'attention MLP' encoder. 
 
