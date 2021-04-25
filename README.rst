@@ -14,7 +14,7 @@ Tutorial: `Link <https://thedebugger811.github.io/posts/2021/04/milestone_1/>`_
 Trajnet++ Baselines Repository: `Link <https://github.com/vita-epfl/trajnetplusplusbaselines/>`_  
 
 Approach
---------
+========
 
 Here is what we did: 
 
@@ -25,7 +25,7 @@ Here is what we did:
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
 Results
--------
+=======
 
 Motivated as we are, we trained the following models (organized by training data set):
 
@@ -50,7 +50,12 @@ Motivated as we are, we trained the following models (organized by training data
 - directional (paula) 
 - attentionmlp (felix)
 
+Evaluation
+----------
 
+Models trained on five_parallel_synth data
+.. image:: trained_models/five_parallel_synth/Results_cropped.png
+  :width: 400
 
 
 
