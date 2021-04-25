@@ -94,6 +94,10 @@ Models trained on **real_data_noCFF** data
   :width: 400
 
 
+All models have been tested on the *five_parallel_synth/test_private* data. 
+
+
+
 Visualizing predictions
 -----------------------
 
