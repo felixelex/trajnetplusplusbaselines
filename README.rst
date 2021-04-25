@@ -149,7 +149,8 @@ SCENE ID: 46845
 AICrowd submission
 ==================
 
-Our AICrowd submission can be found here [LINK]
+Our AICrowd submission can be found here: `Link <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/132434/>`_
+
 
 
 
