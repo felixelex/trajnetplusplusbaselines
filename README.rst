@@ -59,13 +59,12 @@ Training statistics
 
 .. raw:: html
 
-    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png" width="400px">
-    
-.. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
-  :width: 200px
+    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png" width="600px">
 
-.. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
-  :width: 200px
+.. raw:: html
+
+    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.train.png" width="600px">
+    
 
 Considering the two plots above, we can note several things:
 
