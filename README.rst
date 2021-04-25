@@ -72,7 +72,7 @@ Considering the two plots above, we can note several things:
 - The loss decreases for all models. This implies that all models are able to learn from the data.
 - There is a jump in the performance improvement after epoch 10. This coincides with the scheduled decrease of the learning rate after epoch 10. The second learning rate decrease after epoch 20 has no major effect.
 - The standard deviation of the loss function remains quite large throughout the training.
-- No matter which dataset is used, modes considering interaction between pedestrains always have lower loss. 
+- No matter which dataset is used, models considering interaction between pedestrains always have lower loss. 
 
 
 
@@ -160,6 +160,28 @@ SCENE ID: 46845
 .. raw:: html
 
    <img src="trained_models/figures/sd-visualize.scene46845.png" width="400px">
+   
+   
+SCENE ID: 48031
+
+*five_parallel_synth*
+
+.. raw:: html
+
+   <img src="trained_models/figures/fps-visualize.scene48031.png" width="400px">
+
+*real_data_noCFF*
+
+.. raw:: html
+
+   <img src="trained_models/figures/no-visualize.scene48031.png" width="400px">
+
+*synth_data*
+
+.. raw:: html
+
+   <img src="trained_models/figures/sd-visualize.scene48031.png" width="400px">
+
 
 **Interpretation of results:**
 
