@@ -98,15 +98,42 @@ Models trained on **real_data_noCFF** data
 
 
 All models have been tested on the *five_parallel_synth/test_private* data. 
-
+Test: wenn ich hier was schreibe, gehen dann deine Änderungen nicht verloren?
 
 
 Visualizing predictions
 -----------------------
 
-Below, predictions of trained models in 5 different situations are shown:
+Below, predictions of trained models in 2 different situations are shown:
 
+SCENE ID: 43906
 
+.. raw:: html
+
+    <img src="trained_models/figures/fps-visualize.scene43906.png" width="400px">
+
+.. raw:: html
+
+    <img src="trained_models/figures/no-visualize.scene43906.png" width="400px">
+
+.. raw:: html
+
+    <img src="trained_models/figures/sd-visualize.scene43906.png" width="400px">
+    
+    
+SCENE ID: 46845
+
+.. raw:: html
+
+   <img src="trained_models/figures/fps-visualize.scene46845.png" width="400px">
+    
+.. raw:: html
+
+   <img src="trained_models/figures/no-visualize.scene46845.png" width="400px">
+
+.. raw:: html
+
+   <img src="trained_models/figures/sd-visualize.scene46845.png" width="400px">
 
 
 
