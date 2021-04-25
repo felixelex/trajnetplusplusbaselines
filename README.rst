@@ -57,12 +57,12 @@ Motivated as we are, we trained the following models (organized by training data
 Training statistics
 -------------------
 
-.. figure:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
-  :width: 200
+.. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
+  :width: 100px
 
 
-.. figure:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
-  :width: 200
+.. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
+  :width: 200px
 
 
 
