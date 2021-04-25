@@ -24,7 +24,7 @@ Here is what we did:
 * In a next step, we evaluated the different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Results*.
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
-Our trained models and their result visualizations are placed in ./trained_models.
+Our trained models and their result visualizations are placed at `./trained_models`.
 
 Results
 =======
@@ -67,11 +67,6 @@ Training statistics
 
     <img src="trained_models/figures/lstm_attentionmlp_None.pkl.log.train.png" width="600px">
 
-.. image:: trained_models/figures/lstm_attentionmlp_None.pkl.log.epoch-loss.png
-    :width: 45 %
-.. image:: trained_models/figures/lstm_attentionmlp_None.pkl.log.epoch-loss.png
-    :width: 45 %
-
 Considering the two plots above, we can note several things:
 
 - The loss decreases for all models. This implies that all models are able to learn from the data.
@@ -87,7 +82,6 @@ Models trained on **five_parallel_synth** data
 
 .. figure:: trained_models/five_parallel_synth/Results_cropped.png
   :width: 400
-
 
 Models trained on **synth_data** data
 
