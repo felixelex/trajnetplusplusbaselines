@@ -20,7 +20,7 @@ Here is what we did:
 
 * In the first step, we went through the setup process on our local machine. We trained some simple models (vanilla LSTM, directional LSTM) on a small data set (five_parallel_synth_split). Furthermore, we evaluated these models and plotted statistics and predictions.
 * In the second step, we went once more through the setup process, but this time on the EPFL SCITAS server. After becomming Masters of the command line, we managed to run the same training jobs as we did previously on our local machine - showing that everything works just fine.
-* Next, we trained a number of models on different data sets. We used both our local machines as well as SCITAS to run these trainings. A list of all trained models can be found in the *Training model list* section.
+* Next, we trained a number of models on different data sets. We used both our local machines as well as SCITAS to run these trainings. A list of all trained models can be found in the *Training models* section.
 * In the next step, we evaluated different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Evaluation and Results*.
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
@@ -28,9 +28,6 @@ Our trained models and result visualizations are placed at *./trained_models*.
 
 Training Models
 =======
-
-Trained model list
-------------------
 
 Motivated as we are, we trained the following models (organized by training data set):
 
