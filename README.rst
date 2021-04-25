@@ -31,24 +31,24 @@ Motivated as we are, we trained the following models (organized by training data
 
 *five_parallel_synth*
 
-- vanilla (danya, paula)
-- directional (danya, paula)
+- vanilla
+- directional
 
 *synth_data*
 
-- vanilla (danya)
-- directional (danya)
-- attentionmlp (danya still running) 
+- vanilla 
+- directional 
+- attentionmlp (canceled, took too long) 
 
 *real_data*
 
-- vanilla (felix) 
-- directional (paula still running) 
-- attentionmlp (felix, currently running)
+- vanilla 
+- attentionmlp (canceled, took too long)
 
 *real_data_noCFF* (subset of real_data)
 
-- attentionmlp (felix, currently running)
+- directional (paula) 
+- attentionmlp (felix)
 
 
 
