@@ -14,7 +14,7 @@ Tutorial: `Link <https://thedebugger811.github.io/posts/2021/04/milestone_1/>`_
 Trajnet++ Baselines Repository: `Link <https://github.com/vita-epfl/trajnetplusplusbaselines/>`_  
 
 Approach
---------
+========
 
 Here is what we did: 
 
@@ -24,8 +24,10 @@ Here is what we did:
 * In a next step, we evaluated the different models. While using the extensive scoring of *Trajnet++*, we also plotted the model predictions in different situations. For more details, see *Results*.
 * Finally, we picked our best performing model, and uploaded an submission to `AICrowd <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_.
 
+Our trained models and their result visualizations are placed at `./trained_models`.
+
 Results
--------
+=======
 
 Motivated as we are, we trained the following models (organized by training data set):
 
@@ -41,142 +43,109 @@ Motivated as we are, we trained the following models (organized by training data
 - attentionmlp (canceled, took too long) 
 
 *real_data*
-
-- vanilla 
+ 
 - attentionmlp (canceled, took too long)
 
 *real_data_noCFF* (subset of real_data)
 
-- directional (paula) 
-- attentionmlp (felix)
+- vanilla
+- directional
+- attentionmlp
 
 
 
 
 
+Training statistics
+-------------------
 
+.. raw:: html
 
-TrajNet++ : The Trajectory Forecasting Framework
-================================================
+    <img src="trained_models/figures/lstm_attentionmlp_None.pkl.log.epoch-loss.png" width="600px">
 
-PyTorch implementation of `Human Trajectory Forecasting in Crowds: A Deep Learning Perspective <https://arxiv.org/pdf/2007.03639.pdf>`_ 
+.. raw:: html
 
-.. figure:: docs/train/cover.png
+    <img src="trained_models/figures/lstm_attentionmlp_None.pkl.log.train.png" width="600px">
 
-TrajNet++ is a large scale interaction-centric trajectory forecasting benchmark comprising explicit agent-agent scenarios. Our framework provides proper indexing of trajectories by defining a hierarchy of trajectory categorization. In addition, we provide an extensive evaluation system to test the gathered methods for a fair comparison. In our evaluation, we go beyond the standard distance-based metrics and introduce novel metrics that measure the capability of a model to emulate pedestrian behavior in crowds. Finally, we provide code implementations of > 10 popular human trajectory forecasting baselines.
+Considering the two plots above, we can note several things:
 
+- The loss decreases for all models. This implies that all models are able to learn from the data.
+- There is a jump in the performance improvement after epoch 10. This coincides with the scheduled decrease of the learning rate after epoch 10. The second learning rate decrease after epoch 20 has no major effect.
+- The standard deviation of the loss function remains quite large throughout the training.
 
-Data Setup
-==========
-
-The detailed step-by-step procedure for setting up the TrajNet++ framework can be found `here <https://thedebugger811.github.io/posts/2020/03/intro_trajnetpp/>`_
-
-Converting External Datasets
-----------------------------
-
-To convert external datasets into the TrajNet++ framework, refer to this `guide <https://thedebugger811.github.io/posts/2020/10/data_conversion/>`_ 
-
-Training Models
-===============
-
-LSTM
-----
-
-The training script and its help menu:
-``python -m trajnetbaselines.lstm.trainer --help``
-
-**Run Example**
-
-.. code-block::
-
-   ## Our Proposed D-LSTM
-   python -m trajnetbaselines.lstm.trainer --type directional --augment
-
-   ## Social LSTM 
-   python -m trajnetbaselines.lstm.trainer --type social --augment --n 16 --embedding_arch two_layer --layer_dims 1024
-
-
-
-GAN
----
-
-The training script and its help menu:
-``python -m trajnetbaselines.sgan.trainer --help``
-
-**Run Example**
-
-.. code-block::
-
-   ## Social GAN (L2 Loss + Adversarial Loss)
-   python -m trajnetbaselines.sgan.trainer --type directional --augment
-   
-   ## Social GAN (Variety Loss only)
-   python -m trajnetbaselines.sgan.trainer --type directional --augment --d_steps 0 --k 3
 
 
 Evaluation
-==========
+----------
 
-The evaluation script and its help menu: ``python -m evaluator.trajnet_evaluator --help``
+Models trained on **five_parallel_synth** data
 
-**Run Example**
+.. figure:: trained_models/five_parallel_synth/Results_cropped.png
+  :width: 400
 
-.. code-block::
+Models trained on **synth_data** data
 
-   ## TrajNet++ evaluator (saves model predictions. Useful for submission to TrajNet++ benchmark)
-   python -m evaluator.trajnet_evaluator --output OUTPUT_BLOCK/trajdata/lstm_directional_None.pkl --path <path_to_test_file>
-   
-   ## Fast Evaluator (does not save model predictions)
-   python -m evaluator.fast_evaluator --output OUTPUT_BLOCK/trajdata/lstm_directional_None.pkl --path <path_to_test_file>
+.. figure:: trained_models/synth_data/Results_cropped.png
+  :width: 400
 
-More details regarding TrajNet++ evaluator are provided `here <https://github.com/vita-epfl/trajnetplusplusbaselines/blob/master/evaluator/README.rst>`_
+Models trained on **real_data_noCFF** data
 
-Evaluation on datasplits is based on the following `categorization <https://github.com/vita-epfl/trajnetplusplusbaselines/blob/master/docs/train/Categorize.png>`_
-
-
-Results
--------
-
-Unimodal Comparison of interaction encoder designs on interacting trajectories of TrajNet++ real world dataset. Errors reported are ADE / FDE in meters, collisions in mean % (std. dev. %) across 5 independent runs. Our goal is to reduce collisions in model predictions without compromising distance-based metrics.
-
-+----------------+------------+-------------------+ 
-| Method         |   ADE/FDE  | Collisions        | 
-+----------------+------------+-------------------+ 
-| LSTM           |  0.60/1.30 | 13.6 (0.2)        | 
-+----------------+------------+-------------------+ 
-| S-LSTM         |  0.53/1.14 |  6.7 (0.2)        |  
-+----------------+------------+-------------------+ 
-| S-Attn         |  0.56/1.21 |  9.0 (0.3)        |  
-+----------------+------------+-------------------+ 
-| S-GAN          |  0.64/1.40 |  6.9 (0.5)        |   
-+----------------+------------+-------------------+ 
-| D-LSTM (ours)  |  0.56/1.22 |  **5.4** **(0.3)**| 
-+----------------+------------+-------------------+ 
+.. figure:: trained_models/real_data_noCFF/Results_cropped.png
+  :width: 400
 
 
-Interpreting Forecasting Models
-===============================
+All models have been tested on the *five_parallel_synth/test_private* data. 
+Test: wenn ich hier was schreibe, gehen dann deine Änderungen nicht verloren?
 
-+-------------------------------------------------------------------------+
-|  .. figure:: docs/train/LRP.gif                                         |
-|                                                                         |
-|     Visualizations of the decision-making of social interaction modules |
-|     using layer-wise relevance propagation (LRP). The darker the yellow |
-|     circles, the more is the weight provided by the primary pedestrian  |
-|     (blue) to the corresponding neighbour (yellow).                     |
-+-------------------------------------------------------------------------+
 
-Code implementation for explaining trajectory forecasting models using LRP can be found `here <https://github.com/vita-epfl/trajnetplusplusbaselines/tree/LRP>`_
+Visualizing predictions
+-----------------------
+       
+Below, predictions of trained models in 2 different situations are shown:
 
-Benchmarking Models
-===================
+SCENE ID: 43906
 
-We host the `Trajnet++ Challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_ on AICrowd allowing researchers to objectively evaluate and benchmark trajectory forecasting models on interaction-centric data. We rely on the spirit of crowdsourcing, and encourage researchers to submit their sequences to our benchmark, so the quality of trajectory forecasting models can keep increasing in tackling more challenging scenarios.
+.. raw:: html
 
-Citation
-========
+    <img src="trained_models/figures/fps-visualize.scene43906.png" width="400px">
 
-If you find this code useful in your research then please cite
+.. raw:: html
+
+    <img src="trained_models/figures/no-visualize.scene43906.png" width="400px">
+
+.. raw:: html
+
+    <img src="trained_models/figures/sd-visualize.scene43906.png" width="400px">
+    
+    
+SCENE ID: 46845
+
+.. raw:: html
+
+   <img src="trained_models/figures/fps-visualize.scene46845.png" width="400px">
+    
+.. raw:: html
+
+   <img src="trained_models/figures/no-visualize.scene46845.png" width="400px">
+
+.. raw:: html
+
+   <img src="trained_models/figures/sd-visualize.scene46845.png" width="400px">
+
+
+
+AICrowd submission
+==================
+
+Our AICrowd submission can be found here [LINK]
+
+
+
+
+Reference
+=========
+
+The used Trajnet++ Baseline code has been developed by
 
 .. code-block::
 

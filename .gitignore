@@ -2,7 +2,6 @@ data/
 dest/
 dest_new/
 aicrowd_submissions/
-goal_files/
 
 DATA_BLOCK/
 output/
@@ -24,6 +23,7 @@ evaluator/nll.py
 *.sh
 *.run
 *.pt
+*.ndjson
 
 # Python
 venv*/
