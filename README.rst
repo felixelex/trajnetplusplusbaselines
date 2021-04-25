@@ -174,7 +174,7 @@ SCENE ID: 48031
 
 .. raw:: html
 
-   <img src="trained_models/figures/no-visualize.scene48031.png" width="400px">
+   <img src="trained_models/figures/rd_no-visualize.scene48031.png" width="400px">
 
 *synth_data*
 
