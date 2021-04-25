@@ -26,8 +26,11 @@ Here is what we did:
 
 Our trained models and result visualizations are placed at `./trained_models`.
 
-Results
+Training Models
 =======
+
+Trained model list
+------------------
 
 Motivated as we are, we trained the following models (organized by training data set):
 
@@ -54,8 +57,6 @@ Motivated as we are, we trained the following models (organized by training data
 
 
 
-
-
 Training statistics
 -------------------
 
@@ -76,8 +77,10 @@ Considering the two plots above, we can note several things:
 
 
 
-Evaluation
-----------
+Evaluation and Results
+======================
+
+All models have been tested on the *five_parallel_synth/test_private* data.
 
 Models trained on **five_parallel_synth (fps)** data
 
@@ -92,11 +95,9 @@ Models trained on **synth_data (sd)** data
 Models trained on **real_data_noCFF (rd)** data
 
 .. figure:: trained_models/real_data_noCFF/Results_cropped.png
-  :width: 400
+  :width: 400 
 
-
-All models have been tested on the *five_parallel_synth/test_private* data. 
-
+**Metric used** 
 Average Displacement Error (**ADE**): Average L2 distance between the ground truth and prediction of the primary pedestrian over all predicted time steps. Lower is better.
 
 Final Displacement Error (**FDE**): The L2 distance between the final ground truth coordinates and the final prediction coordinates of the primary pedestrian. Lower is better
