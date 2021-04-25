@@ -58,10 +58,10 @@ Training statistics
 -------------------
 
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
-  :width: 200px
+  :width: 100px
 
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
-  :width: 200px
+  :width: 100px
 
 Considering the two plots above, we can note several things:
 
@@ -75,8 +75,6 @@ Evaluation
 ----------
 
 Models trained on **five_parallel_synth** data
-
-<img src="trained_models/five_parallel_synth/Results_cropped.png" alt="drawing" width="100"/>
 
 .. figure:: trained_models/five_parallel_synth/Results_cropped.png
   :width: 400
