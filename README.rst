@@ -58,11 +58,11 @@ Training statistics
 -------------------
 
 .. figure:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
-  :width: 400
+  :width: 200
 
 
 .. figure:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
-  :width: 400
+  :width: 200
 
 
 
