@@ -59,7 +59,7 @@ Training statistics
 
 .. raw:: html
 
-    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png" height="200px">
+    <img src="trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png" width="400px">
     
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.epoch-loss.png
   :width: 200px
