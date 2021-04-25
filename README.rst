@@ -122,13 +122,19 @@ Below, predictions of trained models in 2 different situations are shown:
 
 SCENE ID: 43906
 
+*five_parallel_synth*
+
 .. raw:: html
 
     <img src="trained_models/figures/fps-visualize.scene43906.png" width="400px">
 
+*real_data*
+
 .. raw:: html
 
     <img src="trained_models/figures/no-visualize.scene43906.png" width="400px">
+
+*synth_data*
 
 .. raw:: html
 
@@ -137,13 +143,19 @@ SCENE ID: 43906
     
 SCENE ID: 46845
 
+*five_parallel_synth*
+
 .. raw:: html
 
    <img src="trained_models/figures/fps-visualize.scene46845.png" width="400px">
-    
+
+*real_data*
+
 .. raw:: html
 
    <img src="trained_models/figures/no-visualize.scene46845.png" width="400px">
+
+*synth_data*
 
 .. raw:: html
 
@@ -151,6 +163,7 @@ SCENE ID: 46845
 
 **Interpretation of results:**
 
+For the visualisation we took the trained models and tested them on the test dataset available for the *five_parallel_synth* dataset. This might explain why the models which were trained on other datasets (*synth_data* and *real_data*) perform not as good as the models trained on the *five_parallel_synth* dataset. Furthermore we can observe that the predictions made by a D-Grid model (with interaction encoder) are anticipitating better the actual trajectory. In the case of the model trained on the *real_data* it is possible that the lack of goal information (we do not know where pedestrians want to go) makes it more difficult to do proper predictions. 
 
 AICrowd submission
 ==================
