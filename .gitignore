@@ -24,6 +24,7 @@ evaluator/nll.py
 *.sh
 *.run
 *.pt
+*.ndjson
 
 # Python
 venv*/
