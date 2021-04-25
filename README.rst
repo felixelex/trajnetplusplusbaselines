@@ -63,6 +63,13 @@ Training statistics
 .. image:: trained_models/figures/lstm_goals_directional_None.pkl.log.train.png
   :width: 200px
 
+Considering the two plots above, we can note several things:
+
+- The loss decreases for all models. This implies that all models are able to learn from the data.
+- There is a jump in the performance improvement after epoch 10. This coincides with the scheduled decrease of the learning rate after epoch 10. The second learning rate decrease after epoch 20 has no major effect.
+- The standard deviation of the loss function remains quite large throughout the training.
+
+
 
 Evaluation
 ----------
