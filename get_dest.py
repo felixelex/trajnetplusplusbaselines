@@ -60,6 +60,7 @@ def generate_dest(sc, input_file):
 
 
 sc = pysparkling.Context()
+print(sc)
 input_file = './DATA_BLOCK/trajdata/train/biwi_hotel.ndjson'
 generate_dest(sc, input_file)
 input_file = './DATA_BLOCK/trajdata/train/crowds_zara01.ndjson'
@@ -79,6 +80,13 @@ generate_dest(sc, input_file)
 input_file = './DATA_BLOCK/trajdata/val/crowds_uni_examples.ndjson'
 generate_dest(sc, input_file)
 input_file = './DATA_BLOCK/trajdata/val/crowds_zara02.ndjson'
+generate_dest(sc, input_file)
+
+input_file = './DATA_BLOCK/synth_data/train/orca_synth.ndjson'
+generate_dest(sc, input_file)
+input_file = './DATA_BLOCK/synth_data/test/orca_synth.ndjson'
+generate_dest(sc, input_file)
+input_file = './DATA_BLOCK/synth_data/val/orca_synth.ndjson'
 generate_dest(sc, input_file)
 # input_file = './DATA_BLOCK/data/train/real_data/biwi_hotel.ndjson'
 # generate_dest(sc, input_file)
