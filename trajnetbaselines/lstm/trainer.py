@@ -25,6 +25,7 @@ from .. import __version__ as VERSION
 
 from .utils import center_scene, random_rotation
 from .data_load_utils import prepare_data
+from .contrastive import SocialNCE, ProjHead, EventEncoder, SpatialEncoder
 
 class Trainer(object):
     def __init__(self, model=None, criterion=None, optimizer=None, lr_scheduler=None,
@@ -55,6 +56,10 @@ class Trainer(object):
 
         self.start_length = start_length
         self.obs_dropout = obs_dropout
+
+	self.contrastive = SocialNCE(obs_length, pred_length, projection_head.to(self.device), encoder_sample.to(self.device), contrast_temperature, contrast_horizon, contrast_sampling)
+        self.contrast_weight = contrast_weight
+        self.contrast_sampling = contrast_sampling
 
         self.col_weight = col_weight
         self.col_gamma = col_gamma
@@ -260,19 +265,36 @@ class Trainer(object):
         rel_outputs, outputs = self.model(observed, batch_scene_goal, batch_split, prediction_truth)
 
         ## Loss wrt primary tracks of each scene only
-        l2_loss = self.criterion(rel_outputs[-self.pred_length:], targets, batch_split) * self.batch_size
-        loss = l2_loss
+        #l2_loss = self.criterion(rel_outputs[-self.pred_length:], targets, batch_split) * self.batch_size
+        #loss = l2_loss
         # Auxiliary collision loss
         # l2_loss = self.criterion(rel_outputs[-self.pred_length:], targets, batch_split) * self.batch_size
         # col_loss = self.col_weight * self.criterion.col_loss(outputs[-self.pred_length:], batch_scene[-self.pred_length:], batch_split, self.col_gamma)
         # loss = l2_loss + col_loss
+	
 
+
+	## Loss wrt primary tracks of each scene only
+	loss_predict = self.criterion(rel_outputs[-self.pred_length:], targets, batch_split) * self.batch_size
+
+	# ------------- Social NCE ----------------
+        if self.contrast_weight > 0:
+            if self.contrast_sampling == 'single':
+                loss_contrastive = self.contrastive.spatial(batch_scene, batch_split, batch_feat)
+            elif self.contrast_sampling == 'multi':
+                loss_contrastive = self.contrastive.event(batch_scene, batch_split, batch_feat)
+            else:
+                raise NotImplementedError
+            loss = loss_predict + loss_contrastive * self.contrast_weight
+        else:
+            loss = loss_predict
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        return l2_loss.item()
+        #return l2_loss.item()
+	return loss.item(), loss_predict.item(), loss_contrastive.item() if self.contrast_weight > 0 else 0.0
 
     def val_batch(self, batch_scene, batch_scene_goal, batch_split):
         """Validation of B batches in parallel, B : batch_size
@@ -419,12 +441,42 @@ def main(epochs=25):
                                  help='hyperparameter in collision loss')
 
 
+
+    # Social-NCE
+    hyperparameters.add_argument('--contrast_weight', default=0.0, type=float,
+                                 help='loss weight')
+    hyperparameters.add_argument('--contrast_temperature', default=0.07, type=float,
+                                 help='')
+    hyperparameters.add_argument('--contrast_sampling', type=str, default='single',
+                                 help='single, multi')
+    hyperparameters.add_argument('--contrast_horizon', default=4, type=int,
+                                 help='')
+    hyperparameters.add_argument('--contrast_pretrain', default=0, type=int,
+                                 help='number of epoch to pretrain contrastive heads')
+    hyperparameters.add_argument('--contrast_dim', default=8, type=int,
+                                 help='dimension of projected embedding')
+
     args = parser.parse_args()
 
     ## Fixed set of scenes if sampling
     if args.sample < 1.0:
         torch.manual_seed("080819")
         random.seed(1)
+
+	
+    ## Prepare data
+    train_scenes, train_goals, _ = prepare_data('DATA_BLOCK/' + args.path, subset='/train/', sample=args.sample, goals=args.goals)
+    val_scenes, val_goals, val_flag = prepare_data('DATA_BLOCK/' + args.path, subset='/val/', sample=args.sample, goals=args.goals)
+
+    args.path += '/{}/'.format(args.type)
+
+    # ------------- Social NCE ----------------
+    if args.contrast_weight > 0:
+        args.path += 'snce_{}_w_{:.2f}_h_{:d}_t_{:.2f}_p_{:d}'.format(args.contrast_sampling, args.contrast_weight, args.contrast_horizon, args.contrast_temperature, args.contrast_pretrain)
+    else:
+        args.path += 'baseline'
+
+
 
     ## Define location to save trained model
     if not os.path.exists('OUTPUT_BLOCK/{}'.format(args.path)):
@@ -542,6 +594,21 @@ def main(epochs=25):
                       save_every=args.save_every, start_length=args.start_length, obs_dropout=args.obs_dropout,
                       augment_noise=args.augment_noise, col_weight=args.col_weight, col_gamma=args.col_gamma,
                       val_flag=val_flag)
+
+
+    # ------------- Social NCE ----------------
+    if args.contrast_pretrain > 0 and args.contrast_weight > 0:
+        # freeze forecasting model parameters
+        for param in model.parameters():
+            param.requires_grad = False
+        # pretrain contrastive heads
+        for i in range(args.contrast_pretrain):
+            trainer.train(train_scenes, train_goals, i-args.contrast_pretrain)
+        # release forecasting model parameters
+        for param in model.parameters():
+            param.requires_grad = True
+
+    # train
     trainer.loop(train_scenes, val_scenes, train_goals, val_goals, args.output, epochs=args.epochs, start_epoch=start_epoch)
 
 
