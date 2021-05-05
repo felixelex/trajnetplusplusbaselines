@@ -226,10 +226,19 @@ class LSTM(torch.nn.Module):
             normals.append(normal)
             positions.append(obs2 + normal[:, :2])  # no sampling, just mean
 
+        # ----------- Social NCE -------------
+        hidden_state_memory = []
+        hidden_state_memory.append(torch.stack([h for h in hidden_cell_state[0]], dim=0))
+
+
         # initialize predictions with last position to form velocity. DEEP COPY !!!
-        prediction_truth = copy.deepcopy(list(itertools.chain.from_iterable(
-            (observed[-1:], prediction_truth)
+        #prediction_truth = copy.deepcopy(list(itertools.chain.from_iterable(
+            (observed[-1:].detach().clone(), prediction_truth)
         )))
+	#from new lstm.py but does not use deep copy
+        prediction_truth = list(itertools.chain.from_iterable(
+            (observed[-1:].detach().clone(), prediction_truth)
+        ))
 
         # decoder, predictions
         for obs1, obs2 in zip(prediction_truth[:-1], prediction_truth[1:]):
@@ -249,6 +258,10 @@ class LSTM(torch.nn.Module):
             normals.append(normal)
             positions.append(obs2 + normal[:, :2])  # no sampling, just mean
 
+            # embedding
+            hidden_state_memory.append(torch.stack([h for h in hidden_cell_state[0]], dim=0))
+
+
         # Pred_scene: Tensor [seq_length, num_tracks, 2]
         #    Absolute positions of all pedestrians
         # Rel_pred_scene: Tensor [seq_length, num_tracks, 5]
@@ -256,7 +269,11 @@ class LSTM(torch.nn.Module):
         rel_pred_scene = torch.stack(normals, dim=0)
         pred_scene = torch.stack(positions, dim=0)
 
-        return rel_pred_scene, pred_scene
+        # ----------- Social NCE -------------
+        feat_scene = torch.stack(hidden_state_memory, dim=0)
+
+
+        return rel_pred_scene, pred_scene, feat_scene
 
 class LSTMPredictor(object):
     def __init__(self, model):
