@@ -44,31 +44,53 @@ class SocialNCE():
         #       (Use this block to visualize the raw data)
         # -----------------------------------------------------
 
-        # for i in range(batch_split.shape[0] - 1):
-        #     traj_primary = batch_scene[:, batch_split[i]] # [time, 2]
-        #     traj_neighbor = batch_scene[:, batch_split[i]+1:batch_split[i+1]] # [time, num, 2]
-        #     plot_scene(traj_primary, traj_neighbor, fname='scene_{:d}.png'.format(i))
-        # import pdb; pdb.set_trace()
+        for i in range(batch_split.shape[0] - 1):
+            traj_primary = batch_scene[:, batch_split[i]] # [time, 2]
+            traj_neighbor = batch_scene[:, batch_split[i]+1:batch_split[i+1]] # [time, num, 2]
+            plot_scene(traj_primary, traj_neighbor, fname='scene_{:d}.png'.format(i))
+        import pdb; pdb.set_trace()
 
         # #####################################################
         #           TODO: fill the following code
         # #####################################################
-
+        #navigation: https://github.com/vita-epfl/social-nce-crowdnav/blob/main/crowd_nav/snce/contrastive.py
+        #forecasting: https://github.com/YuejiangLIU/social-nce-trajectron-plus-plus/blob/master/trajectron/snce/contrastive.py
         # -----------------------------------------------------
         #               Contrastive Sampling 
         # -----------------------------------------------------
+        #maybe sth like this as we don't have EventSampler (this part of code is copied from trainer.py, and used pred_length)
+        self.start_length = random.randint(0, self.obs_length - 2)
+        
+        observed = batch_scene[self.start_length:self.obs_length].clone()
+        prediction_truth = batch_scene[self.obs_length:self.pred_length-1].clone()
+        targets = batch_scene[self.pred_length:self.seq_length] - batch_scene[self.obs_length-1:self.seq_length-1]
 
         # -----------------------------------------------------
         #              Lower-dimensional Embedding 
         # -----------------------------------------------------
-
+        emb_obsv = self.head_projection(batch_feat[:,:,:1])
+        emb_pos = self.encoder_sample(candidate_pos, time_pos[:, :, None])
+        emb_neg = self.encoder_sample(candidate_neg, time_neg[:, :, None])
+        
         # -----------------------------------------------------
         #                   Compute Similarity 
         # -----------------------------------------------------
-
+        #normalization
+        query = nn.functional.normalize(emb_obsv, dim = -1)
+        key_pos = nn.functional.normalize(emb_pos, dim = -1)
+        key_neg = nn.functional.normalize(emb_neg, dim = -1)
+        
+        #similarity
+        sim_pos = (query * key_pos.unsqueeze(1)).sum(dim=-1)
+        sim_neg = (query.unsqueeze(2) * key_neg.unsqueeze(1)).sum(dim=-1)
+        
+        #logits maybe needs flattening
+        logits = torch.cat([sim_pos, sim_neg], dim=1)/self.temperature
         # -----------------------------------------------------
         #                       NCE Loss 
         # -----------------------------------------------------
+        labels = torch.zeros(logits.size(0), dtype = torch.long, device = logits.device)
+        loss = self.criterion(logits, labels)
 
         return loss
 
