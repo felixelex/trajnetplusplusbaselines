@@ -71,6 +71,14 @@ class SocialNCE():
         key_pos = self.encoder_sample(sample_pos) # (num_scene, head_dim) = (8,8)
         key_neg = self.encoder_sample(sample_neg) # (num_scene, num_neighbors*9, head_dim) = (8,36,8)
         
+        """ 
+        FELIX:  I think we should normalize the embeded samples, right?
+                They say so in the paper on page 4. If you agree you can
+                uncomment the code below.
+        """
+        # key_pos = nn.functional.normalize(key_pos, dim=-1)
+        # key_neg = nn.functional.normalize(key_neg, dim=-1)
+        
         # -----------------------------------------------------
         #                   Compute Similarity 
         # -----------------------------------------------------
@@ -79,6 +87,11 @@ class SocialNCE():
         query = query[self.horizon-1] # (num_scene, head_dim) = (8,8)
         sim_pos = (query * key_pos).sum(dim=1) # (8,)
         sim_neg = (query[:,None,:] * key_neg).sum(dim=2) # (8,9x)
+        
+        ### Proposition Felix:
+        sim_pos = (query[:,None,:] * key_pos[:,None,:]).sum(dim=-1)
+        sim_neg = (query[:,None,:] * key_neg).sum(dim=-1)
+        sim_neg[torch.isnan(sim_neg)] = -10
         
         # -----------------------------------------------------
         #                       NCE Loss 
