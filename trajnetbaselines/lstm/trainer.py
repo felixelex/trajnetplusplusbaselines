@@ -276,7 +276,7 @@ class Trainer(object):
 
         ## Loss wrt primary tracks of each scene only
         loss_predict = self.criterion(rel_outputs[-self.pred_length:], targets, batch_split) * self.batch_size
-
+        
         # ------------- Social NCE ----------------
         if self.contrast_weight > 0:
             if self.contrast_sampling == 'single':

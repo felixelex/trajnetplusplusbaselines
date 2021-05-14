@@ -2,6 +2,8 @@ import math
 import torch
 import torch.nn as nn
 
+from .lstm import drop_distant
+
 class SocialNCE():
     '''
         Social NCE: Contrastive Learning of Socially-aware Motion Representations (https://arxiv.org/abs/2012.11717)
@@ -27,7 +29,7 @@ class SocialNCE():
         self.noise_local = 0.1
         self.min_seperation = 0.2 # rho
         self.agent_zone = self.min_seperation * torch.tensor([[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0], [0.707, 0.707], [0.707, -0.707], [-0.707, 0.707], [-0.707, -0.707], [0.0, 0.0]])
-
+        
     def spatial(self, batch_scene, batch_split, batch_feat):
         '''
             Social NCE with spatial samples, i.e., samples are locations at a specific time of the future
@@ -40,7 +42,7 @@ class SocialNCE():
         Output:
             loss: social nce loss
         '''
-
+        
         # -----------------------------------------------------
         #               Visualize Trajectories 
         #       (Use this block to visualize the raw data)
@@ -67,18 +69,14 @@ class SocialNCE():
         # -----------------------------------------------------
         
         query = self.head_projection(batch_feat[:,batch_split.tolist()[:-1],:]) # (pred_len, num_scene, head_dim) = (12,8,8)
-        
+                
         key_pos = self.encoder_sample(sample_pos) # (num_scene, head_dim) = (8,8)
         key_neg = self.encoder_sample(sample_neg) # (num_scene, num_neighbors*9, head_dim) = (8,36,8)
         
-        """ 
-        FELIX:  I think we should normalize the embeded samples, right?
-                They say so in the paper on page 4. If you agree you can
-                uncomment the code below.
-        """
-        # key_pos = nn.functional.normalize(key_pos, dim=-1)
-        # key_neg = nn.functional.normalize(key_neg, dim=-1)
-        
+        key_pos = nn.functional.normalize(key_pos, dim=-1)
+        key_neg = nn.functional.normalize(key_neg, dim=-1)
+        query = nn.functional.normalize(query, dim=-1) # @Danya: I added this, they do the same in the sample code
+                
         # -----------------------------------------------------
         #                   Compute Similarity 
         # -----------------------------------------------------
@@ -88,15 +86,15 @@ class SocialNCE():
         sim_pos = (query * key_pos).sum(dim=1) # (8,)
         sim_neg = (query[:,None,:] * key_neg).sum(dim=2) # (8,9x)
         
-        ### Proposition Felix:
-        sim_pos = (query[:,None,:] * key_pos[:,None,:]).sum(dim=-1)
-        sim_neg = (query[:,None,:] * key_neg).sum(dim=-1)
-        sim_neg[torch.isnan(sim_neg)] = -10
+        """
+        Felix:  think about this again!
+        """
         
         # -----------------------------------------------------
         #                       NCE Loss 
         # -----------------------------------------------------
         logits = torch.cat([sim_pos.unsqueeze(1), sim_neg], dim=1) # (8,9x+1)
+        logits = logits / self.temperature
         labels = torch.zeros(logits.size(0), dtype=torch.long, device=logits.device) #(8,)
         loss = self.criterion(logits, labels)
 
@@ -141,7 +139,7 @@ class SocialNCE():
         # -----------------------------------------------------
 
         num_scene = batch_split.size(0) - 1 # = 8
-        max_num_nbr = int(max(batch_split[1:] - batch_split[:-1]).item())
+        max_num_nbr = int(max(batch_split[1:] - batch_split[:-1]).item()) 
         num_neg = self.agent_zone.size(0) # = 9
         num_coor = gt_future.size(-1) # = 2
         
@@ -157,6 +155,7 @@ class SocialNCE():
         # in order to make the tensor be able to reshape a dimension of num_scene,
         # insert 0 to those having smaller size than the largest one at the end.
         # This won't make difference when computing similarity.
+        """ @Danya: Why? I checked and it looks to me that they are all of the same length... (32, 9, 2) """
         for i,bs in enumerate(batch_split[1:]):
             nb = bs - batch_split[i]
             if nb < max_num_nbr:
@@ -169,9 +168,19 @@ class SocialNCE():
         #       Remove negatives that are too hard (optional)
         # -----------------------------------------------------
 
+        """
+        Felix:  remove samples that are too close to primary agent.
+                eg., use 1.5 * min_seperation
+        """
+
         # -----------------------------------------------------
         #       Remove negatives that are too easy (optional)
         # -----------------------------------------------------
+
+        """
+        Felix:  remove samples that are too far away from primary agent.
+                eg., use max_seperation = 3
+        """
 
         return sample_pos, sample_neg
 
