@@ -24,7 +24,7 @@ evaluator/nll.py
 *.run
 *.pt
 *.ndjson
-
+	
 # Python
 venv*/
 *.pyc
@@ -57,3 +57,5 @@ trajnetbaselines/wta_lstm_backup/
 
 # Google drive files
 *.ini
+
+# Test files from Felix
