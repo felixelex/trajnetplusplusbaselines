@@ -29,6 +29,8 @@ class SocialNCE():
         self.noise_local = 0.1
         self.min_seperation = 0.2 # rho
         self.agent_zone = self.min_seperation * torch.tensor([[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0], [0.707, 0.707], [0.707, -0.707], [-0.707, 0.707], [-0.707, -0.707], [0.0, 0.0]])
+        
+        self.i = 0
 
     def spatial(self, batch_scene, batch_split, batch_feat):
         '''
@@ -63,7 +65,7 @@ class SocialNCE():
         # -----------------------------------------------------
         
         sample_pos, sample_neg = self._sampling_spatial(batch_scene, batch_split) # (8,2), (8,9x,2)
-        
+                
         # -----------------------------------------------------
         #              Lower-dimensional Embedding 
         # -----------------------------------------------------
@@ -89,7 +91,15 @@ class SocialNCE():
         logits = torch.cat([sim_pos.unsqueeze(1), sim_neg], dim=1) / self.temperature # (8,9x+1)
         labels = torch.zeros(logits.size(0), dtype=torch.long, device=logits.device) #(8,)
         loss = self.criterion(logits, labels)
-
+        
+        # visualize samples and raw data
+        if self.i == 0:
+            for i in range(batch_split.shape[0] - 1):
+                traj_primary = batch_scene[:, batch_split[i]] # [time, 2]
+                traj_neighbor = batch_scene[:, batch_split[i]+1:batch_split[i+1]] # [time, num, 2]
+                plot_scene_with_samples(traj_primary, traj_neighbor, self.obs_length, sample_pos[i], sample_neg[i], fname='scene_{:d}.png'.format(i))
+                self.i += 1
+        
         return loss
 
     def event(self, batch_scene, batch_split, batch_feat):
@@ -341,6 +351,43 @@ def plot_scene(primary, neighbor, fname):
         ax.plot(neighbor[:, i, 0], neighbor[:, i, 1], 'b-.')
 
     ax.set_aspect('equal')
+    plt.grid()
+    plt.savefig(fname, bbox_inches='tight', pad_inches=0)
+    plt.close(fig)
+    
+    
+def plot_scene_with_samples(primary, neighbor, obs_len, sample_pos, sample_neg, fname):
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure(frameon=False)
+    fig.set_size_inches(16, 9)
+    ax = fig.add_subplot(1, 1, 1)
+    
+    ax.plot(primary[0,0], primary[0,1], 'kx')
+    ax.plot(primary[:obs_len, 0], primary[:obs_len, 1], 'k.-', label='primary (observed)')
+    ax.plot(primary[(obs_len-1):, 0], primary[(obs_len-1):, 1], 'k.:', label='primary (truth)')
+    
+    for i in range(neighbor.size(1)):
+        ax.plot(neighbor[:obs_len, i, 0], neighbor[:obs_len, i, 1], 'k-', alpha=0.3, label='neighbors (observed)')
+        ax.plot(neighbor[(obs_len-1):, i, 0], neighbor[(obs_len-1):, i, 1], 'k:', alpha=0.3, label='neighbors (truth)')
+        ax.plot(neighbor[0,i,0], neighbor[0,i,1], 'kx', label='start')
+        ax.plot(neighbor[-1,i,0], neighbor[-1,i,1], 'k.', label='end')
+    
+    # plot positive and negative samples
+    ax.plot(sample_pos[0], sample_pos[1], 'g*', label='positive samples')
+    for i in range(sample_neg.size(0)):
+        ax.plot(sample_neg[i,0], sample_neg[i,1], 'r.', label='negative samples')
+    
+    lines, labels = [], []
+    for line, label in zip(ax.get_legend_handles_labels()[0], ax.get_legend_handles_labels()[1]):
+        if label not in labels:
+            lines.append(line)
+            labels.append(label)
+            
+    ax.set_aspect('equal')
+    ax.legend(lines, labels, loc='upper center')
     plt.grid()
     plt.savefig(fname, bbox_inches='tight', pad_inches=0)
     plt.close(fig)
