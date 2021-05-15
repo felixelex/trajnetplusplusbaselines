@@ -2,8 +2,6 @@ import math
 import torch
 import torch.nn as nn
 
-from .lstm import drop_distant
-
 class SocialNCE():
     '''
         Social NCE: Contrastive Learning of Socially-aware Motion Representations (https://arxiv.org/abs/2012.11717)
@@ -68,25 +66,37 @@ class SocialNCE():
         #              Lower-dimensional Embedding 
         # -----------------------------------------------------
         
-        emb_obs = self.head_projection(batch_feat[self.horizon-1,batch_split.tolist()[:-1],:]) # (num_scene, head_dim) = (8,8)        
-        emb_pos = self.encoder_sample(sample_pos) # (num_scene, head_dim) = (8,8)
-        emb_neg = self.encoder_sample(sample_neg) # (num_scene, num_neighbors*9, head_dim) = (8,36,8)
-        # normalization
-        query = nn.functional.normalize(emb_obs, dim=-1)
-        key_pos = nn.functional.normalize(emb_pos, dim=-1)
-        key_neg = nn.functional.normalize(emb_neg, dim=-1)
+        query = self.head_projection(batch_feat[:,batch_split.tolist()[:-1],:]) # (pred_len, num_scene, head_dim) = (12,8,8)
+        
+        key_pos = self.encoder_sample(sample_pos) # (num_scene, head_dim) = (8,8)
+        key_neg = self.encoder_sample(sample_neg) # (num_scene, num_neighbors*9, head_dim) = (8,36,8)
+        
+        """ 
+        FELIX:  I think we should normalize the embeded samples, right?
+                They say so in the paper on page 4. If you agree you can
+                uncomment the code below.
+        """
+        # key_pos = nn.functional.normalize(key_pos, dim=-1)
+        # key_neg = nn.functional.normalize(key_neg, dim=-1)
         
         # -----------------------------------------------------
         #                   Compute Similarity 
         # -----------------------------------------------------
         
+        ### George said it's incorrect to take only last predict length...
+        query = query[self.horizon-1] # (num_scene, head_dim) = (8,8)
         sim_pos = (query * key_pos).sum(dim=1) # (8,)
         sim_neg = (query[:,None,:] * key_neg).sum(dim=2) # (8,9x)
+        
+        ### Proposition Felix:
+        sim_pos = (query[:,None,:] * key_pos[:,None,:]).sum(dim=-1)
+        sim_neg = (query[:,None,:] * key_neg).sum(dim=-1)
+        sim_neg[torch.isnan(sim_neg)] = -10
         
         # -----------------------------------------------------
         #                       NCE Loss 
         # -----------------------------------------------------
-        logits = torch.cat([sim_pos.unsqueeze(1), sim_neg], dim=1) / self.temperature # (8,9x+1)
+        logits = torch.cat([sim_pos.unsqueeze(1), sim_neg], dim=1) # (8,9x+1)
         labels = torch.zeros(logits.size(0), dtype=torch.long, device=logits.device) #(8,)
         loss = self.criterion(logits, labels)
 
@@ -95,65 +105,24 @@ class SocialNCE():
     def event(self, batch_scene, batch_split, batch_feat):
         '''
             Social NCE with event samples, i.e., samples are spatial-temporal events at various time steps of the future
-            
-            Input:
-            batch_scene: coordinates of agents in the scene, tensor of shape 
-                [obs_length + pred_length, total num of agents in the batch, 2]
-            batch_split: index of scene split in the batch, tensor of shape [batch_size + 1]
-            batch_feat: encoded features of observations, tensor of shape [pred_length, scene, feat_dim]
-        Output:
-            loss: social nce loss
         '''
-        
-        # contrastive sampling
-        sample_pos, sample_neg = self._sampling_event(batch_scene, batch_split) # (8,4,2), (8,4,9x,2)
-        
-        # lower-dimensional embedding
-        emb_obs = self.head_projection(batch_feat[self.horizon-1,batch_split.tolist()[:-1],:]) # (num_scene, head_dim) = (8,8)        
-        time_pos = (torch.ones(sample_pos.size(0))[:, None] * (torch.arange(self.horizon) - (self.horizon-1.0)*(0.5))[None, :]) # (num_scene, horizon)
-        time_neg = (torch.ones(sample_neg.size(0), sample_neg.size(2))[:, None, :] * (torch.arange(self.horizon) - (self.horizon-1.0)*(0.5))[None, :, None]) # (num_scene, horizon, 9x)
-        emb_pos = self.encoder_sample(sample_pos, time_pos[:,:,None]) # (num_scene, horizon, head_dim) = (8,4,8)
-        emb_neg = self.encoder_sample(sample_neg, time_neg[:,:,:,None]) # (num_scene, horizon, num_neighbors*9, head_dim) = (8,4,9x,8)
-        
-        # normalized embedding
-        query = nn.functional.normalize(emb_obs, dim=-1)
-        key_pos = nn.functional.normalize(emb_pos, dim=-1)
-        key_neg = nn.functional.normalize(emb_neg, dim=-1)
-        
-        # compute similarity
-        sim_pos = (query[:,None,:] * key_pos).sum(dim=-1) # (num_scene, horizon) = (8,4)
-        sim_neg = (query[:,None,None,:] * key_neg).sum(dim=-1) # (num_scene, horizon, num_nbr*9) = (8,4,9x)
-        
-        # compute NCE loss
-        logits = torch.cat([sim_pos.view(-1).unsqueeze(1), 
-                            sim_neg.view(sim_neg.size(0),-1).repeat_interleave(self.horizon, dim=0)], dim=1) / self.temperature # (8*4,9x+1)
-        labels = torch.zeros(logits.size(0), dtype=torch.long, device=logits.device) #(8,)
-        loss = self.criterion(logits, labels)
-
-        return loss
+        raise ValueError("Optional")
 
     def _sampling_spatial(self, batch_scene, batch_split):
         '''
-            Rule is based on the Social-NCE paper. For each scene, make one positive sample and 9*n negative samples.
-            where 9=self.agent_zone.size(0), n is the number of neighbor in one scene (which is different from scene to scene).
+            Rule is based on the Social-NCE paper. For each scene, make one positive sample and 9*(M-1) negative samples.
+            where 9=self.agent_zone.size(0), M is the number of agent in one scene (which is different from scene to scene).
             
         inputs:
-            batch_scene: (seq_len, tot_num_agents, 2) = (21,b+n,2)
+            batch_scene: (seq_len, tot_num_agents, 2) = (21,tot_num_agents,2)
             batch_split: (num_scene+1) = (9,)
         
         return:
             sample_pos: (num_scene, 2) = (8,2)
             sample_nes: (num_scene, 9*max_num_nbr, 2) = (8,9x,2)
-        
-        notation:
-            number of scene in the batch = b (=8)
-            number of neighbors in the batch = n 
-            total number of agents in the batch = b+n
-            max number of neighbor = x (>= n/b)
-            
         '''
         
-        gt_future = batch_scene[self.obs_length: self.obs_length+self.pred_length] # (pred_len, tot_num_agents, 2) = (12,b+n,2)
+        gt_future = batch_scene[self.obs_length: self.obs_length+self.pred_length]
 
         # #####################################################
         #           TODO: fill the following code
@@ -199,71 +168,14 @@ class SocialNCE():
         # -----------------------------------------------------
         #       Remove negatives that are too hard (optional)
         # -----------------------------------------------------
-        
-        """
-        Felix:  remove samples that are too close to primary agent.
-                eg., use 1.5 * min_seperation
-        """
-        
+
         # -----------------------------------------------------
         #       Remove negatives that are too easy (optional)
         # -----------------------------------------------------
-        
-        """
-        Felix:  remove samples that are too far away from primary agent.
-                eg., use max_seperation = 3
-        """
 
         return sample_pos, sample_neg
-    
-    def _sampling_event(self, batch_scene, batch_split):
-        '''
-        Sample positive and negative samples for event case. 
-        This will preserve the temporal dimension.
-        
-        inputs:
-            batch_scene: (seq_len, tot_num_agents, 2) = (21,tot_num_agents,2)
-            batch_split: (num_scene+1) = (9,)
-        
-        return:
-            sample_pos: (num_scene, horizon, 2) = (8,4,2)
-            sample_nes: (num_scene, horizon, max_num_nbr*num_neg, num_coor) = (8,4,9x,2)
-        '''
-        gt_future = batch_scene[self.obs_length: self.obs_length+self.pred_length] # (pred_len, tot_num_agents, 2) = (12,n,2)
-        
-        # positive samples
-        gt_primary = gt_future[:self.horizon, batch_split.tolist()[:-1], :].permute(1,0,2) # (num_scene, horizon, 2) = (8,4,2)
-        sample_pos = gt_primary + \
-            torch.rand(gt_primary.size()).sub(0.5) * self.noise_local # (num_scene, pred_len, 2) = (8,4,2)
-        
-        # some parameters
-        num_scene = batch_split.size(0) - 1 # = 8
-        max_num_nbr = int(max(batch_split[1:] - batch_split[:-1]).item())
-        num_neg = self.agent_zone.size(0) # = 9
-        num_coor = gt_future.size(-1) # = 2
-        
-        # negative samples
-        neighbors = [s for s in range(batch_split[-1]) if s not in batch_split.tolist()]
-        gt_neighbors = gt_future[:self.horizon, neighbors, :] # (horizon, tot_num_nbr, num_coor) = (4,n,2)
-        gt_neighbors = torch.tile(gt_neighbors, (1,num_neg)) # (horizon, tot_num_nbr, num_neg*num_coor) = (4,n,18)
-        gt_neighbors = gt_neighbors.reshape(self.horizon, -1, num_neg, num_coor) # (horizon, tot_num_nbr, num_neg, num_coor) = (4,n,9,2)
-        pert = self.agent_zone[None, None, :, :] # (1,1,9,2)
-        sample_neg = gt_neighbors + pert + \
-            torch.rand(gt_neighbors.size()).sub(0.5) * self.noise_local # (horizon, tot_num_nbr, num_neg, num_coor) = (4,n,9,2)
-        
-        # padding zero
-        for i,bs in enumerate(batch_split[1:]):
-            nb = bs - batch_split[i]
-            if nb < max_num_nbr:
-                sample_neg = torch.cat([sample_neg[:,:(i*max_num_nbr+nb)], 
-                                        torch.zeros((self.horizon, max_num_nbr-nb, num_neg, num_coor)), 
-                                        sample_neg[:,(i*max_num_nbr+nb):]], dim=1)
-        sample_neg = sample_neg.reshape(self.horizon, num_scene, -1, num_coor) # (horizon, num_scene, max_num_nbr*num_neg, num_coor) = (4,8,9x,2)
-        sample_neg = sample_neg.permute(1,0,2,3) # (num_scene, horizon, max_num_nbr*num_neg, num_coor) = (8,4,9x,2)
-        
-        return sample_pos, sample_neg
 
-    
+
 class EventEncoder(nn.Module):
     '''
         Event encoder that maps an sampled event (location & time) to the embedding space
