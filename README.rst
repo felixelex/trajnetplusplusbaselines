@@ -1,10 +1,13 @@
-Milestone 1: Getting Started
-============================
+Milestone 2: Implementing Social Contrastive Learning
+=====================================================
 
 **Group B:** Paula Vogg, Danya Li, Felix Hoppe
 
-In this readme, we present the results of our insightful struggle through the first part of the DLAV project. 
 
+Milestone 1: Getting Started
+============================
+
+In this readme, we present the results of our insightful struggle through the first part of the DLAV project. 
 
 Ressources
 ----------
