@@ -248,23 +248,27 @@ class SocialNCE():
         sample_neg = sample_neg.reshape(num_scene, -1, num_coor) # (num_scene, max_num_nbr*num_neg, num_coor) = (8,9x,2)
         
         # -----------------------------------------------------
+        #       Remove negatives that are too easy (optional)
         #       Remove negatives that are too hard (optional)
         # -----------------------------------------------------
+        """"
+        Dimensions:
+            sample_pos  (num_scene, xy) = (8, 2)
+            sample_neg  (num_scene, num_samples, xy) = (8, 9x, 2)
+        """
         
-        """
-        Felix:  remove samples that are too close to primary agent.
-                eg., use 1.5 * min_seperation
-        """
+        # Parameters
+        max_dist = 3.5 # [m]
+        min_dist = 1.5 * self.min_seperation #0.3 [m]
         
-        # -----------------------------------------------------
-        #       Remove negatives that are too easy (optional)
-        # -----------------------------------------------------
+        # Distance
+        dist = sample_neg - torch.tile(sample_pos[:,None,:], (1, sample_neg.size(1), 1))
+        dist = dist.pow(2).sum(2).pow(0.5)
         
-        """
-        Felix:  remove samples that are too far away from primary agent.
-                eg., use max_seperation = 3
-        """
-
+        # Set samples to 0
+        sample_neg[dist > max_dist, :] = 0
+        sample_neg[dist < min_dist, :] = 0
+        
         return sample_pos, sample_neg
     
     def _sampling_event(self, batch_scene, batch_split):
