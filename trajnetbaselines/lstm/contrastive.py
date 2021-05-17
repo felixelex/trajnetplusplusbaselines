@@ -33,7 +33,7 @@ class SocialNCE():
         self.min_seperation = 0.2 # rho
         self.agent_zone = self.min_seperation * torch.tensor([[1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0], [0.707, 0.707], [0.707, -0.707], [-0.707, 0.707], [-0.707, -0.707], [0.0, 0.0]])
         
-        self.i = 0
+        self.i = 1
 
     def spatial(self, batch_scene, batch_split, batch_feat):
         '''
@@ -182,7 +182,8 @@ class SocialNCE():
         gt_primary = gt_future[self.horizon-1, batch_split.tolist()[:-1], :] # (num_scene, 2) = (8,2)
         sample_pos = gt_primary + \
             torch.rand(gt_primary.size()).sub(0.5) * self.noise_local # (num_scene, 2) = (8,2)
-    
+        assert torch.isnan(sample_pos).sum().sum() == 0, "Unvailid entries: sample_pos contains NaN's"
+        
         # -----------------------------------------------------
         #                  Negative Samples
         # -----------------------------------------------------

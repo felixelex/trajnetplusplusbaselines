@@ -169,7 +169,7 @@ class Trainer(object):
                 batch_scene_goal = []
                 batch_split = [0]
 
-#             if (scene_i + 1) % (10*self.batch_size) == 0:
+            if (scene_i + 1) % (10*self.batch_size) == 0:
                 self.log.info({
                     # 'type': 'train',
                     'epoch': epoch, 'batch': '{:d} / {:d}'.format(scene_i, len(scenes)),
