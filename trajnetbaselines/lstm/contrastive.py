@@ -93,6 +93,7 @@ class SocialNCE():
         emb_obs = self.head_projection(batch_feat[self.horizon-1,batch_split.tolist()[:-1],:]) # (num_scene, head_dim) = (8,8)        
         emb_pos = self.encoder_sample(sample_pos) # (num_scene, head_dim) = (8,8)
         emb_neg = self.encoder_sample(sample_neg) # (num_scene, num_neighbors*9, head_dim) = (8,36,8)
+        
         # normalization
         query = nn.functional.normalize(emb_obs, dim=-1)
         key_pos = nn.functional.normalize(emb_pos, dim=-1)
@@ -223,7 +224,7 @@ class SocialNCE():
         # -----------------------------------------------------
 
         num_scene = batch_split.size(0) - 1 # = 8
-        max_num_nbr = int(max(batch_split[1:] - batch_split[:-1]).item())
+        max_num_nbr = int(max(batch_split[1:] - batch_split[:-1]).item()) - 1
         num_neg = self.agent_zone.size(0) # = 9
         num_coor = gt_future.size(-1) # = 2
         
@@ -234,19 +235,23 @@ class SocialNCE():
         pert = self.agent_zone[None, :, :] # (1,9,2)
         sample_neg = gt_neighbors + pert + \
             torch.rand(gt_neighbors.size()).sub(0.5) * self.noise_local # (tot_num_nbr, num_neg, num_coor) = (n,9,2)
-        
+              
         # Since each scene has different number of neighbors, 
         # in order to make the tensor be able to reshape a dimension of num_scene,
         # insert 0 to those having smaller size than the largest one at the end.
         # This won't make difference when computing similarity.
         for i,bs in enumerate(batch_split[1:]):
-            nb = bs - batch_split[i]
+            nb = bs - batch_split[i] - 1
             if nb < max_num_nbr:
+                n_rand = (max_num_nbr-nb) # number of random samples we have to draw from sample_neg
+                sample_rand = sample_neg[i*max_num_nbr + torch.randint(0, nb, (n_rand,))]
                 sample_neg = torch.cat([sample_neg[:(i*max_num_nbr+nb)], 
-                                        torch.zeros((max_num_nbr-nb, num_neg, num_coor)), 
+                                        sample_rand, 
                                         sample_neg[(i*max_num_nbr+nb):]], dim=0)
-        sample_neg = sample_neg.reshape(num_scene, -1, num_coor) # (num_scene, max_num_nbr*num_neg, num_coor) = (8,9x,2)
         
+        assert sample_neg.size(0) == max_num_nbr * num_scene, f"sample_neg of wrong dimensions: {sample_neg.size(0)} instead of {max_num_nbr * num_scene}"
+        sample_neg = sample_neg.reshape(num_scene, -1, num_coor) # (num_scene, max_num_nbr*num_neg, num_coor) = (8,9x,2)
+                
         # -----------------------------------------------------
         #       Remove negatives that are too easy (optional)
         #       Remove negatives that are too hard (optional)
@@ -257,17 +262,27 @@ class SocialNCE():
             sample_neg  (num_scene, num_samples, xy) = (8, 9x, 2)
         """
         
-        # Parameters
-        max_dist = 3.5 # [m]
-        min_dist = 1.5 * self.min_seperation #0.3 [m]
+        # # Parameters
+        # max_dist = 6 # [m]
+        # min_dist = 1.5 * self.min_seperation #0.3 [m]
         
-        # Distance
-        dist = sample_neg - torch.tile(sample_pos[:,None,:], (1, sample_neg.size(1), 1))
-        dist = dist.pow(2).sum(2).pow(0.5)
+        # # Distance
+        # dist = sample_neg - torch.tile(sample_pos[:,None,:], (1, sample_neg.size(1), 1))
+        # dist = dist.pow(2).sum(2).pow(0.5)
         
-        # Set samples to 0
-        sample_neg[dist > max_dist, :] = 0
-        sample_neg[dist < min_dist, :] = 0
+        # print("sample_neg: ", sample_neg.shape)
+        
+        
+        # rand_samples = sample_neg[(dist < max_dist), :]
+        # print("good_samples: ",  good_samples.shape)
+        
+        # print((dist > max_dist).sum(1))
+        
+        # # Set samples to 0
+        # sample_neg[dist < max_dist, :]
+        # sample_neg = sample_neg[dist < max_dist, :]
+        # print(sample_neg.shape)
+        # sample_neg = sample_neg[dist > min_dist, :]
         
         return sample_pos, sample_neg
     
