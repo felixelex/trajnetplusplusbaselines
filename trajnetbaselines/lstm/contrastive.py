@@ -93,13 +93,13 @@ class SocialNCE():
         labels = torch.zeros(logits.size(0), dtype=torch.long, device=logits.device) #(8,)
         loss = self.criterion(logits, labels)
         
-        # visualize samples and raw data
-        if self.i == 0:
-            for i in range(batch_split.shape[0] - 1):
-                traj_primary = batch_scene[:, batch_split[i]] # [time, 2]
-                traj_neighbor = batch_scene[:, batch_split[i]+1:batch_split[i+1]] # [time, num, 2]
-                plot_scene_with_samples(traj_primary, traj_neighbor, self.obs_length, sample_pos[i], sample_neg[i], fname='scene_{:d}.png'.format(i))
-                self.i += 1
+        # # visualize samples and raw data
+        # if self.i == 0:
+        #     for i in range(batch_split.shape[0] - 1):
+        #         traj_primary = batch_scene[:, batch_split[i]] # [time, 2]
+        #         traj_neighbor = batch_scene[:, batch_split[i]+1:batch_split[i+1]] # [time, num, 2]
+        #         plot_scene_with_samples(traj_primary, traj_neighbor, self.obs_length, sample_pos[i], sample_neg[i], fname='scene_{:d}.png'.format(i))
+        #         self.i += 1
         
         return loss
 
