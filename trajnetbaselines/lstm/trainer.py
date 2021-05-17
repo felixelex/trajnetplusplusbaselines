@@ -137,8 +137,14 @@ class Trainer(object):
             else:
                 # remove the scenes with missing data
                 skip += 1
+            
+            # ## Augment scene to batch of scenes
+            # batch_scene.append(scene)
+            # batch_split.append(int(scene.shape[1]))
+            # batch_scene_goal.append(scene_goal)
                         
-            if ((scene_i + 1) % self.batch_size == 0) or ((scene_i + 1) == len(scenes)):
+            # if ((scene_i + 1) % self.batch_size == 0) or ((scene_i + 1) == len(scenes)):
+            if ((len(batch_scene) + 1) % self.batch_size == 0) or (((scene_i + 1) == len(scenes)) and len(batch_scene) !=0):
                 ## Construct Batch
                 batch_scene = np.concatenate(batch_scene, axis=1)
                 batch_scene_goal = np.concatenate(batch_scene_goal, axis=0)
@@ -160,7 +166,7 @@ class Trainer(object):
                 batch_scene_goal = []
                 batch_split = [0]
 
-            if (scene_i + 1) % (10*self.batch_size) == 0:
+            if ((scene_i + 1) % (10*self.batch_size) == 0) and (epoch_loss != 0):
                 self.log.info({
                     # 'type': 'train',
                     'epoch': epoch, 'batch': '{:d} / {:d}'.format(scene_i, len(scenes)),

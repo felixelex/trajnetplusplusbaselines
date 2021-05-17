@@ -165,7 +165,7 @@ class SocialNCE():
         '''
         
         gt_future = batch_scene[self.obs_length: self.obs_length+self.pred_length] # (pred_len, tot_num_agents, 2) = (12,b+n,2)
-
+        
         # #####################################################
         #           TODO: fill the following code
         # #####################################################     
@@ -175,9 +175,12 @@ class SocialNCE():
         # -----------------------------------------------------
 
         gt_primary = gt_future[self.horizon-1, batch_split.tolist()[:-1], :] # (num_scene, 2) = (8,2)
+                
         sample_pos = gt_primary + \
             torch.rand(gt_primary.size()).sub(0.5) * self.noise_local # (num_scene, 2) = (8,2)
-    
+
+        assert torch.isnan(sample_pos).sum().sum() == 0, "Unvailid entries: sample_pos contains NaN's"
+        
         # -----------------------------------------------------
         #                  Negative Samples
         # -----------------------------------------------------
@@ -188,13 +191,16 @@ class SocialNCE():
         num_coor = gt_future.size(-1) # = 2
         
         neighbors = [s for s in range(batch_split[-1]) if s not in batch_split.tolist()]
+        
         gt_neighbors = gt_future[self.horizon-1, neighbors, :] # (tot_num_nbr, num_coor) = (n,2)
         gt_neighbors = torch.tile(gt_neighbors, (1,num_neg)) # (tot_num_nbr, num_neg*num_coor) = (n,18)
         gt_neighbors = gt_neighbors.reshape(-1, num_neg, num_coor) # (tot_num_nbr, num_neg, num_coor) = (n,9,2)
+        
+        # print(torch.isnan(gt_neighbors).sum(2).sum(1))
         pert = self.agent_zone[None, :, :] # (1,9,2)
         sample_neg = gt_neighbors + pert + \
             torch.rand(gt_neighbors.size()).sub(0.5) * self.noise_local # (tot_num_nbr, num_neg, num_coor) = (n,9,2)
-              
+
         # Since each scene has different number of neighbors, 
         # in order to make the tensor be able to reshape a dimension of num_scene,
         # insert 0 to those having smaller size than the largest one at the end.
