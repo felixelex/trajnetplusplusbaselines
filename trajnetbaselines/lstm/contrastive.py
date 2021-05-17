@@ -1,6 +1,9 @@
 import math
+import random
+import numpy as np
 import torch
 import torch.nn as nn
+import pdb
 
 from .lstm import drop_distant
 
@@ -65,7 +68,9 @@ class SocialNCE():
         # -----------------------------------------------------
         
         sample_pos, sample_neg = self._sampling_spatial(batch_scene, batch_split) # (8,2), (8,9x,2)
-                
+        if torch.isnan(sample_pos).sum() != 0 or torch.isnan(sample_neg).sum() != 0:
+            print('NAN_pos={}, NAN_neg={}'.format(torch.isnan(sample_pos).sum(), torch.isnan(sample_neg).sum()))
+        
         # -----------------------------------------------------
         #              Lower-dimensional Embedding 
         # -----------------------------------------------------
@@ -74,7 +79,7 @@ class SocialNCE():
         emb_pos = self.encoder_sample(sample_pos) # (num_scene, head_dim) = (8,8)
         emb_neg = self.encoder_sample(sample_neg) # (num_scene, num_neighbors*9, head_dim) = (8,36,8)
         
-        # normalization
+        # normalized embedding
         query = nn.functional.normalize(emb_obs, dim=-1)
         key_pos = nn.functional.normalize(emb_pos, dim=-1)
         key_neg = nn.functional.normalize(emb_neg, dim=-1)
@@ -196,14 +201,27 @@ class SocialNCE():
             torch.rand(gt_neighbors.size()).sub(0.5) * self.noise_local # (tot_num_nbr, num_neg, num_coor) = (n,9,2)
               
         # Since each scene has different number of neighbors, 
-        # in order to make the tensor be able to reshape a dimension of num_scene,
-        # insert 0 to those having smaller size than the largest one at the end.
-        # This won't make difference when computing similarity.
+        # in order to put all scenes in one matrix,
+        # inserting random negative samples to those having smaller size than the largest one at the end.
         for i,bs in enumerate(batch_split[1:]):
-            nb = bs - batch_split[i] - 1
+            nb = bs - batch_split[i] - 1 # number of neighbors in one scene
+            if nb != 0: # if having neighbors in the scene
+                # fill nan values with random negative sample in the same scene
+                mask = torch.isnan(sample_neg[i*max_num_nbr:i*max_num_nbr+nb]) # mask of locations of nan values
+                if (~mask).sum() != 0:
+                    sample_rand = random.choices(np.unique(np.where(~mask)[0]), 
+                                                 k=torch.where(mask)[0].unique().size(0))
+                    sample_neg[i*max_num_nbr:i*max_num_nbr+nb][mask] = sample_neg[i*max_num_nbr:i*max_num_nbr+nb][[sample_rand]].view(-1)
+                else:
+                    sample_neg[i*max_num_nbr:i*max_num_nbr+nb][mask] = -10*torch.ones((torch.where(mask)[0].unique().size(0), num_neg, num_coor)).view(-1)
+            else: 
+                print('Number of neighbor in scene {} is {}'.format(i+1, nb))
             if nb < max_num_nbr:
                 n_rand = (max_num_nbr-nb) # number of random samples we have to draw from sample_neg
-                sample_rand = sample_neg[i*max_num_nbr + torch.randint(0, nb, (n_rand,))]
+                if nb == 0:
+                    sample_rand = -10*torch.ones((n_rand, num_neg, num_coor))
+                else:
+                    sample_rand = sample_neg[i*max_num_nbr + torch.randint(0, nb, (n_rand,))]
                 sample_neg = torch.cat([sample_neg[:(i*max_num_nbr+nb)], 
                                         sample_rand, 
                                         sample_neg[(i*max_num_nbr+nb):]], dim=0)
@@ -267,7 +285,7 @@ class SocialNCE():
         
         # some parameters
         num_scene = batch_split.size(0) - 1 # = 8
-        max_num_nbr = int(max(batch_split[1:] - batch_split[:-1]).item())
+        max_num_nbr = int(max(batch_split[1:] - batch_split[:-1]).item()) - 1 
         num_neg = self.agent_zone.size(0) # = 9
         num_coor = gt_future.size(-1) # = 2
         
@@ -282,11 +300,15 @@ class SocialNCE():
         
         # padding zero
         for i,bs in enumerate(batch_split[1:]):
-            nb = bs - batch_split[i]
+            nb = bs - batch_split[i] - 1 
             if nb < max_num_nbr:
+                n_rand = (max_num_nbr-nb) # number of random samples we have to draw from sample_neg
+                sample_rand = sample_neg[:, i*max_num_nbr + torch.randint(0, nb, (n_rand,))]
                 sample_neg = torch.cat([sample_neg[:,:(i*max_num_nbr+nb)], 
-                                        torch.zeros((self.horizon, max_num_nbr-nb, num_neg, num_coor)), 
-                                        sample_neg[:,(i*max_num_nbr+nb):]], dim=1)
+                                        sample_rand, 
+                                        sample_neg[:,(i*max_num_nbr+nb):]], dim=1) # (horizon, num_scene*max_num_nbr, num_neg, num_coor)
+                        
+        assert sample_neg.size(1) == max_num_nbr * num_scene, f"sample_neg of wrong dimensions: {sample_neg.size(1)} instead of {max_num_nbr * num_scene}"
         sample_neg = sample_neg.reshape(self.horizon, num_scene, -1, num_coor) # (horizon, num_scene, max_num_nbr*num_neg, num_coor) = (4,8,9x,2)
         sample_neg = sample_neg.permute(1,0,2,3) # (num_scene, horizon, max_num_nbr*num_neg, num_coor) = (8,4,9x,2)
         
@@ -406,7 +428,7 @@ def plot_scene_with_samples(primary, neighbor, obs_len, sample_pos, sample_neg, 
             labels.append(label)
             
     ax.set_aspect('equal')
-    ax.legend(lines, labels, loc='upper center')
+    ax.legend(lines, labels, loc='best')
     plt.grid()
     plt.savefig(fname, bbox_inches='tight', pad_inches=0)
     plt.close(fig)
