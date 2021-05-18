@@ -52,11 +52,12 @@ class Trainer(object):
         self.obs_length = obs_length
         self.pred_length = pred_length
         self.seq_length = self.obs_length+self.pred_length
+        self.contrast_horizon = contrast_horizon
 
         self.augment = augment
         self.augment_noise = augment_noise
         self.col_weight = col_weight
-        self.col_gamma = col_gamma		
+        self.col_gamma = col_gamma
         self.normalize_scene = normalize_scene
 
         self.start_length = start_length
@@ -128,15 +129,23 @@ class Trainer(object):
                 scene, scene_goal = random_rotation(scene, goals=scene_goal)
             if self.augment_noise:
                 scene = augmentation.add_noise(scene, thresh=0.02, ped='neigh')
-
+            
             ## Augment scene to batch of scenes
-            if np.isnan(scene).sum() == 0:
-                batch_scene.append(scene)
-                batch_split.append(int(scene.shape[1]))
-                batch_scene_goal.append(scene_goal)
+            if self.contrast_sampling == 'multi':
+                if np.isnan(scene).sum() == 0:
+                    batch_scene.append(scene)
+                    batch_split.append(int(scene.shape[1]))
+                    batch_scene_goal.append(scene_goal)
+                else: 
+                    skip += 1
             else:
-                # remove the scenes with missing data
-                skip += 1
+                if np.isnan(scene[self.obs_length+self.contrast_horizon-1, 0]).sum() == 0:
+                    batch_scene.append(scene)
+                    batch_split.append(int(scene.shape[1]))
+                    batch_scene_goal.append(scene_goal)
+                else:
+                    # remove the scenes with missing data
+                    skip += 1
                         
             if ((scene_i + 1) % self.batch_size == 0) or ((scene_i + 1) == len(scenes)):
                 ## Construct Batch
@@ -276,7 +285,7 @@ class Trainer(object):
 
         ## Loss wrt primary tracks of each scene only
         loss_predict = self.criterion(rel_outputs[-self.pred_length:], targets, batch_split) * self.batch_size
-        
+
         # ------------- Social NCE ----------------
         if self.contrast_weight > 0:
             if self.contrast_sampling == 'single':
