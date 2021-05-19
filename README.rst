@@ -10,9 +10,13 @@ Social Contrastive Learning
 
 Contrastive learning used with negative data augmentation is said to increase the robustness of forecasting models. Given pedestrian trajecotries, we us a part as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
 
+Learning curves real_data: 
+
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/SCL_negative_data_augmentation.png" width="400px">
+
+
 
 
 Sampling
@@ -62,7 +66,9 @@ Note that in the first place we used the skipping technique to deal with NaN val
 Evaluation & Results
 --------------------
 
+.. raw:: html
 
+    <img src="trained_models/Milestone2/figures/real_data_learning_curves.png" width="400px">
 
 
 
