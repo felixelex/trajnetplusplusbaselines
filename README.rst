@@ -72,18 +72,17 @@ Note that in the first place we used the skipping technique (skipping the scenes
 Evaluation & Results
 --------------------
 
-Learning Curves
+Learning Curves of real data set
 +++++++++++++++
-
-**Training set:** Real data
 
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/real_data_learning_curves.png" width="400px">
 
-The above figure shows the learning curves of all 5 models which have been trained on the real data set. The curves look very similar for the firs 4 models. The 5th model has been has been pretrained for 25 epochs on synth_data. As we didn't reset the learning rate, it used a much lower learning rate as the other models. Considering the high initial loss, we can make the assumption that training on synth_data does not generalize very well to real_data.
+The above figure shows the learning curves of all 5 models which have been trained on the real data set. The curves look very similar for the first 4 models. The 5th model has been has been pretrained for 25 epochs on synth_data. As we didn't reset the learning rate, it used a much lower learning rate as the other models. Considering the high initial loss, we can make the assumption that training on synth_data does not generalize very well to real_data.
 
-**Training set:** Synth data
+Learning Curves of synthetic data set
++++++++++++++++
 
 .. raw:: html
 
@@ -92,7 +91,7 @@ The above figure shows the learning curves of all 5 models which have been train
 We trained 4 different models on synth_data, although unfortunately only 2 have been trained up to epoch 25 (in order to avoid too extensive computation times). As the use of different parameters effects the way the loss has been computed, we can't draw any conclusions directly from this plot but rather have to consider the evaluation metrics.
 
 
-Evaluation
+Evaluation of synthetic dataset models on five_parallel_synth
 ++++++++++
 
 Synth data:
@@ -103,7 +102,10 @@ Synth data:
 
 The above table is showing the evaluation results from all models trained on *synth data*, and tested on *five_parallel_synth*. The two relevant metrics for AICrowd are FDE (final deplacement error) and Col-I (collision); for both lower is better. On the *five_parallel_synth* data set, all *single* models are giving the same results. The one *multi* model has a higher Col-I score and a lower FDE score. This seems reasonable, given that the model trains on dynamic negative samples and thus will be less cautious about collisions.  
 
-In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. In Milestone 1 our best model reached FDE = 1.210 and Col-I = 7.220, while now we achieve **FDE = 1.200** and **Col-I = 4.710 with contrastive learning!**
+Evaluation from AI crowd
++++++
+
+In the table below, for each model the hyperparameters and the evalution score from AI crowd are given. In Milestone 1 our best model reached FDE = 1.210 and Col-I = 7.220, while now we achieve **FDE = 1.200** and **Col-I = 4.710 with contrastive learning!**
 
 +------------+------------+-------------+----------+-------+-------+
 |  weight    | horizon    | temperature | sampling | FDE   | Col-I |
