@@ -12,11 +12,13 @@ Pipeline
 
     <img src="trained_models/Milestone2/figures/pipeline.png" width="600px">
     
-    
+Given pedestrian trajecotries, we use a part of the trajectories as historical data and use the remaining data in the future to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. 
+
+
 Social Contrastive Learning
 --------
 
-Contrastive learning used with negative data augmentation is said to increase the robustness of the neural motion models. Given pedestrian trajecotries, we use a part of the trajectories as historical data and use the remaining data in the future to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. The basic idea of contrastive learning is to use a simple similarity measure between our learned embeddings (positive and negative sampl) to approximate the preferred neighborhood relationships. The samlping strategy in *social* contrastive learning is based on our domain knowledge of socially unfavorable events in the multi-agent context, which observed that it is typically forbidden or uncomfortable for multiple agents to visit the same or adjacent places simultaneously.
+Contrastive learning used with negative data augmentation is said to increase the robustness of the neural motion models. The basic idea of contrastive learning is to use a simple similarity measure between our learned embeddings (truth, positive and negative samples) to approximate the preferred neighborhood relationships. The special samlping strategy in *social* contrastive learning is based on our domain knowledge of socially unfavorable events in the multi-agent context, which observed that it is typically forbidden or uncomfortable for multiple agents to visit the same or adjacent places simultaneously. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
 
 .. raw:: html
 
@@ -24,16 +26,13 @@ Contrastive learning used with negative data augmentation is said to increase th
 
 
 
-Sampling
+Contrastive Sampling
 --------
 
-Spatial sampling
-++++++++++++++++
+The single-frame sampling algorithm wihch only samples locations at a specific time of the future follows the following steps: 
 
-The spatial sampling algorithm follows the following steps: 
-
-* **Positive samples:** Given a fixed horizon, we select the corresponding sample from the ground truth and add some noise to it. 
-* **Negative samples:** Treating negative samples was more challenging, as the number of neighbors (agents other than the primary agent) might vary from scene to scene. In order to have the same tensor size for all scenes, we filled up scenes (with few neighbors and NaN's) with random samples from neighbors of the same scene. This shouldn't change the overall outcome, as we are randomly assigning a higher weight to a neighbor.
+* **Positive samples:** Given a fixed future horizon, we select the corresponding sample from the ground truth of primary agent and add some noise to it. 
+* **Negative samples:** Given a fixed future horizon, we select the corresponding sample from the ground truth of neighboring agents with local displacement and add some noise to them. It is worth mentioning that treating negative samples was more challenging, as the number of neighbors (agents other than the primary agent) might vary from scene to scene. In order to have the same tensor size for all scenes, we filled up scenes (with few neighbors and NaN's) with random samples from neighbors of the same scene. This shouldn't change the overall outcome, as we are randomly assigning a higher weight to a neighbor.
 
 In the figure below we plotted the trajectories of the pedestrians and added the sampling at the time horizon in the plot. In red nine negative samples per neighbour are shown, while the green point shows the positive sample. Remember for each scene one primary pedestrian and several neighbours are chosen. The trajectroy of the primary gives the postive sample and the trajectories of the neigbours give the negative samples. In addition to that, the observed and the future trajectory as well as the horizon (here horizon = 4) are shown.
 
