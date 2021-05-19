@@ -30,7 +30,7 @@ In the figure below we plotted the trajectories of the pedestrians and added the
 
 .. raw:: html
 
-    <img src="trained_models/Milestone2/figures/data_sampling_synth_data.jpeg" width="600px">
+    <img src="trained_models/Milestone2/figures/data_sampling_synth_data.jpeg" width="400px">
 
 
 Having created our samples, we performed the following steps for spatial NCE:
