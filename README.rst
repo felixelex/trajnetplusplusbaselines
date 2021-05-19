@@ -8,7 +8,7 @@ In this second milestone, we implemented **Social NCE** based on `this paper <ht
 Social Contrastive Learning
 --------
 
-Contrastive learning used with negative data augmentation is said to increase the robustness of the neural motion models. Given pedestrian trajecotries, we use a part of the trajectory as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice by incorporating our domain knowledge of socially unfavorable events in multi-agents context. 
+Contrastive learning used with negative data augmentation is said to increase the robustness of forecasting models. Given pedestrian trajecotries, we us a part of the trajectory as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
 
 .. raw:: html
 
@@ -86,16 +86,15 @@ We trained 4 different models on synth_data, although unfortunately only 2 have 
 Evaluation
 ++++++++++
 
-Real data:
+Synth data:
 
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/synth_data_eval.jpg" width="800px">
 
+The above table is showing the evaluation results from all models trained on *synth data*, and tested on *five_parallel_synth*. The two relevant metrics for AICrowd are FDE (final deplacement error) and Col-I (collision); for both lower is better. On the *five_parallel_synth* data set, all *single* models are giving the same results. The one *multi* model has a higher Col-I score and a lower FDE score. This seems reasonable, given that the model trains on dynamic negative samples and thus will be less cautious about collisions.  
 
-
-In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. We can see that compared to Milestone 1 we had for our best model FDE = 1.210 and Col-I = 7.220, we can reach **FDE = 1.200** and **Col-I = 4.710 with contrastive learning**!
-
+In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. In Milestone 1 our best model reached FDE = 1.210 and Col-I = 7.220, while now we achieve FDE = 1.200 and Col-I = 4.710 with contrastive learning!
 
 +------------+------------+-------------+----------+-------+-------+
 |  weight    | horizon    | temperature | sampling | FDE   | Col-I |
@@ -113,8 +112,9 @@ In the table below, for each model the hyperparameters are given and the evaluat
 | 1          | 4          | 0.1         | multi    | 1.220 | 4.470 |
 +------------+------------+-------------+----------+-------+-------+
 
-From these results we can conclude the following on the hyper parameter tuning: 
+From our results, we can draw the following conclusions: 
 
+* Social NCE sampling improves results
 * augmenting the temperature to 0.2 does not increase the performance.
 * augmenting the time horizon does decrease the overall performance of the model, however for h = 12 we find that the collision test actually gets better.
 * augmenting contrastive weight form 1 to 2, decreases the model’s performance. 
@@ -125,9 +125,16 @@ From these results we can conclude the following on the hyper parameter tuning:
 
 
 AICrowd submission
-==================
+++++++++++++++++++
 
 Our AICrowd submission can be found here: `Link <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/138580>`_
+
+
+
+
+
+
+
 
 
 
