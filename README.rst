@@ -8,10 +8,8 @@ In this second milestone, we implemented **Social NCE** based on `this paper <ht
 Pipeline
 --------
 
-.. raw:: html
-
-    <img src="trained_models/Milestone2/figures/pipeline.png" width="400px">
-
+.. figure:: trained_models/Milestone2/figures/pipeline.png
+  :width: 400 
 
 Social Contrastive Learning
 --------
