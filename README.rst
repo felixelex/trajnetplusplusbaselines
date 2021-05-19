@@ -87,7 +87,11 @@ We trained 4 different models on synth_data, although unfortunately only 2 have 
 Evaluation
 ++++++++++
 
+Real data:
 
+.. raw:: html
+
+    <img src="trained_models/Milestone2/figures/synth_data_eval.jpg" width="400px">
 
 
 
