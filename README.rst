@@ -8,7 +8,7 @@ In this second milestone, we implemented **Social NCE** based on `this paper <ht
 Social Contrastive Learning
 --------
 
-Contrastive learning used with negative data augmentation is said to increase the robustness of forecasting models. Given pedestrian trajecotries, we us a part of the trajectory as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
+Contrastive learning used with negative data augmentation is said to increase the robustness of the neural motion models. Given pedestrian trajecotries, we use a part of the trajectory as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice by incorporating our domain knowledge of socially unfavorable events in multi-agents context. 
 
 .. raw:: html
 
@@ -94,7 +94,7 @@ Real data:
 
 
 
-In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. We can see that compared to Milestone 1 we had for our best model FDE = 1.210 and Col-I = 7.220, we can reach FDE = 1.200 and Col-I = 4.710 with contrastive learning!
+In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. We can see that compared to Milestone 1 we had for our best model FDE = 1.210 and Col-I = 7.220, we can reach **FDE = 1.200** and **Col-I = 4.710 with contrastive learning**!
 
 
 +------------+------------+-------------+----------+-------+-------+
