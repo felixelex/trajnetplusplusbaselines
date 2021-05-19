@@ -95,7 +95,16 @@ Real data:
 
 
 
+In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. We can see that compared to Milestone 1 we had for our best model FDE = and Col-I = , we can reach FDE = 1.200 and Col-I = 4.710 with contrastive learning!
 
+| weight | horizon | temperature | sampling | FDE   | Col-I |
+|--------|---------|-------------|----------|-------|-------|
+| 1      | 4       | 0.1         | single   | 1.200 | 4.710 |
+| 1      | 4       | 0.2         | single   | 1.210 | 5.310 |
+| 1      | 8       | 0.1         | single   | 1.250 | 5.190 |
+| 1      | 12      | 0.1         | single   | 1.220 | 4.470 |
+| 2      | 4       | 0.1         | single   | 1.200 | 5.310 |
+| 1      | 4       | 0.1         | multi    | 1.220 | 4.470 |
 
 
 
