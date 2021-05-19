@@ -1,7 +1,36 @@
+**Group B:** Paula Vogg, Danya Li, Felix Hoppe
+
 Milestone 2: Implementing Social Contrastive Learning
 =====================================================
 
-**Group B:** Paula Vogg, Danya Li, Felix Hoppe
+In this second milestone, we implemented **Social NCE** based on `this paper <https://arxiv.org/pdf/2012.11717.pdf>`_. We implemented both, spatial and event sampling, trained multiple models and finally tested and evaluated them in `this AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
+
+Sampling
+--------
+
+Spatial sampling
+++++++++++++++++
+
+The spatial sampling algorithm follows the following steps: 
+
+* **Positive samples:** Given a fixed horizon, we select the corresponding sample from the ground truth and add some noise to it. 
+* **Negative samples:** Treating negative samples was more challenging, as the number of neighbors (agents other than the primary agent) might vary from scene to scene. In order to have the same tensor size for all scenes, we filled scenes with few neighbors and NaN's up with random samples from neighbors of the same scene. This shouldn't change the overall outcome, as we are randomly assigning a higher weight to a neighbor.
+
+
+
+
+Training
+--------
+
+
+
+Evaluation & Results
+--------------------
+
+
+
+
+
 
 
 Milestone 1: Getting Started
