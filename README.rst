@@ -72,6 +72,28 @@ Evaluation & Results
 
 
 
+.. raw:: html
+
+    <img src="trained_models/Milestone2/figures/synth_data_learning_curves.png" width="400px">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Milestone 1: Getting Started
