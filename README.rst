@@ -1,7 +1,26 @@
+**Group B:** Paula Vogg, Danya Li, Felix Hoppe
+
 Milestone 2: Implementing Social Contrastive Learning
 =====================================================
 
-**Group B:** Paula Vogg, Danya Li, Felix Hoppe
+In this second milestone, we implemented **Social NCE** based on `this paper <https://arxiv.org/pdf/2012.11717.pdf>`_. We implemented both, spatial and event sampling, trained multiple models and finally tested and evaluated them in `this AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
+
+Sampling
+--------
+
+
+Training
+--------
+
+
+
+Evaluation & Results
+--------------------
+
+
+
+
+
 
 
 Milestone 1: Getting Started
