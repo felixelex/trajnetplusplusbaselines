@@ -10,8 +10,6 @@ Social Contrastive Learning
 
 Contrastive learning used with negative data augmentation is said to increase the robustness of forecasting models. Given pedestrian trajecotries, we us a part as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
 
-Learning curves real_data: 
-
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/SCL_negative_data_augmentation.png" width="400px">
@@ -66,9 +64,42 @@ Note that in the first place we used the skipping technique to deal with NaN val
 Evaluation & Results
 --------------------
 
+Learning Curves
++++++++++++++++
+
+**Training set:** Real data
+
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/real_data_learning_curves.png" width="400px">
+
+The above figure shows the learning curves of all 5 models which have been trained on the real data set. The curves look very similar for the firs 4 models. The 5th model has been has been pretrained for 25 epochs on synth_data. As we didn't reset the learning rate, it used a much lower learning rate as the other models. Furthermore, considering the high initial loss, we can make the assumption that training on synth_data does not generalize very well to real_data.
+
+**Training set:** Synth data
+
+.. raw:: html
+
+    <img src="trained_models/Milestone2/figures/synth_data_learning_curves.png" width="400px">
+
+We trained 4 different models on synth_data, although unfortunately only 2 have been trained up to epoch 25 (in order to avoid to extensive computation times). As the use of different parameters effects the way the loss has been computed, we can't draw any conclusions directly from this plot but rather have to consider the evaluation metrics.
+
+
+Evaluation
+++++++++++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
