@@ -8,12 +8,11 @@ In this second milestone, we implemented **Social NCE** based on `this paper <ht
 Social Contrastive Learning
 --------
 
-Contrastive learning used with negative data augmentation is said to increase the robustness of forecasting models. Given pedestrian trajecotries, we us a part as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
+Contrastive learning used with negative data augmentation is said to increase the robustness of forecasting models. Given pedestrian trajecotries, we us a part of the trajectory as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
 
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/SCL_negative_data_augmentation.png" width="400px">
-
 
 
 
@@ -26,9 +25,9 @@ Spatial sampling
 The spatial sampling algorithm follows the following steps: 
 
 * **Positive samples:** Given a fixed horizon, we select the corresponding sample from the ground truth and add some noise to it. 
-* **Negative samples:** Treating negative samples was more challenging, as the number of neighbors (agents other than the primary agent) might vary from scene to scene. In order to have the same tensor size for all scenes, we filled scenes with few neighbors and NaN's up with random samples from neighbors of the same scene. This shouldn't change the overall outcome, as we are randomly assigning a higher weight to a neighbor.
+* **Negative samples:** Treating negative samples was more challenging, as the number of neighbors (agents other than the primary agent) might vary from scene to scene. In order to have the same tensor size for all scenes, we filled up scenes (with few neighbors and NaN's) with random samples from neighbors of the same scene. This shouldn't change the overall outcome, as we are randomly assigning a higher weight to a neighbor.
 
-In the figure below we plotted the trajectories of the pedestrians and added the sampling at the time horizon in the plot. In red there are the nine negative sample per neighbour and the green point shows the positive sample. Remember for each scene one primary pedestrian and several neighbours are chosen. The trajectroy of the primary gives the postive sample and the trajectories of the neigbours give the negative samples. In addition to that, the observed and the future trajectory as well as the horizon (here horizon = 4) are shown.
+In the figure below we plotted the trajectories of the pedestrians and added the sampling at the time horizon in the plot. In red nine negative samples per neighbour are shown, while the green point shows the positive sample. Remember for each scene one primary pedestrian and several neighbours are chosen. The trajectroy of the primary gives the postive sample and the trajectories of the neigbours give the negative samples. In addition to that, the observed and the future trajectory as well as the horizon (here horizon = 4) are shown.
 
 .. raw:: html
 
@@ -37,14 +36,14 @@ In the figure below we plotted the trajectories of the pedestrians and added the
 
 Having created our samples, we performed the following steps for spatial NCE:
 
-* Lower dimension embedding of observations (past trajectories) and positive / negative samples
+* Lower dimensional embedding of observations (past trajectories) and positive / negative samples
 * Normalization of all lower dimensional embeddings
 * Computation of NCE Loss
 
 
 Training
 --------
-While training, once our code performed without error, we investigate the different hyperparameters:
+While training, once our code performed without error, we investigate different hyperparameters:
 
 * contrastive weight (relative weight of NCE loss compared to the normal loss)
 * contrastive temperature (for down or upscaling of similarity)
@@ -58,7 +57,7 @@ In general we trained the models on both data sets (real and synthetic data). Th
 * weight = 1, temperature = 0.1, horizon = 8, replace
 * weight = 1, temperature = 0.1, horizon = 12, replace
 
-Note that in the first place we used the skipping technique to deal with NaN values but it didn't work for real data because of the high amount of NaN values. Therefore we changed to the replacement technique. The models trained with skip were on synthetic data and we think the performance for synthetic data uing skipping or replacing is similar because of the small amount of NaN values.
+Note that in the first place we used the skipping technique (skipping of scenes with NaN's) to deal with NaN values. This didn't work for real data due to the high amount of NaN values. Therefore we changed to the replacement technique (replacement of NaN's with random samples from other neighbors). The models trained using skipping were trained on synthetic data and we think the performance for synthetic data uing skipping or replacing is similar (as in general we only had very few NaN's here).
 
 
 Evaluation & Results
@@ -73,7 +72,7 @@ Learning Curves
 
     <img src="trained_models/Milestone2/figures/real_data_learning_curves.png" width="400px">
 
-The above figure shows the learning curves of all 5 models which have been trained on the real data set. The curves look very similar for the firs 4 models. The 5th model has been has been pretrained for 25 epochs on synth_data. As we didn't reset the learning rate, it used a much lower learning rate as the other models. Furthermore, considering the high initial loss, we can make the assumption that training on synth_data does not generalize very well to real_data.
+The above figure shows the learning curves of all 5 models which have been trained on the real data set. The curves look very similar for the firs 4 models. The 5th model has been has been pretrained for 25 epochs on synth_data. As we didn't reset the learning rate, it used a much lower learning rate as the other models. Considering the high initial loss, we can make the assumption that training on synth_data does not generalize very well to real_data.
 
 **Training set:** Synth data
 
@@ -81,7 +80,7 @@ The above figure shows the learning curves of all 5 models which have been train
 
     <img src="trained_models/Milestone2/figures/synth_data_learning_curves.png" width="400px">
 
-We trained 4 different models on synth_data, although unfortunately only 2 have been trained up to epoch 25 (in order to avoid to extensive computation times). As the use of different parameters effects the way the loss has been computed, we can't draw any conclusions directly from this plot but rather have to consider the evaluation metrics.
+We trained 4 different models on synth_data, although unfortunately only 2 have been trained up to epoch 25 (in order to avoid too extensive computation times). As the use of different parameters effects the way the loss has been computed, we can't draw any conclusions directly from this plot but rather have to consider the evaluation metrics.
 
 
 Evaluation
