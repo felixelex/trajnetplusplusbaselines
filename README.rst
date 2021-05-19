@@ -5,6 +5,16 @@ Milestone 2: Implementing Social Contrastive Learning
 
 In this second milestone, we implemented **Social NCE** based on `this paper <https://arxiv.org/pdf/2012.11717.pdf>`_. We implemented both, spatial and event sampling, trained multiple models and finally tested and evaluated them in `this AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
 
+Social Contrastive Learning
+--------
+
+Contrastive learning used with negative data augmentation has been said to increase the robustness of forecasting models. In the data of pedestrian trajecotries, we define some as hsitorical data and use the remaining data to create positive and negative samples. For that we choose a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
+
+.. raw:: html
+
+    <img src="trained_models/Milestone2/figures/SCL_negative_data_augmentation.png" width="400px">
+
+
 Sampling
 --------
 
