@@ -42,7 +42,24 @@ Having created our samples, we performed the following steps for spatial NCE:
 
 Training
 --------
+While training, once our code performed without error, we investigate the different hyperparameters:
 
+* contrastive weights
+* temperature for down or upscaling the similarity
+* horizon
+* some more?!
+
+In our analysis, we include the effect of different temperature, different contrastive weights, and different time horizons. 
+
+In general we trained the models on both data sets (real and synthetic data). The following combination were trained: 
+
+* weight = 1, temperature = 0.1, horizon = 4, skip (synth), replace (real)
+* weight = 2, temperature = 0.1, horizon = 4, replace
+* weight = 1, temperature = 0.2, horizon = 4, skip (synth), replace (real)
+* weight = 1, temperature = 0.1, horizon = 8, replace
+* weight = 1, temperature = 0.1, horizon = 12, replace
+
+Note that in the first place we used the skipping technique to deal with NaN values but it didn't work for real data because of the high amount of NaN values. Therefore we changed to the replacement technique. The models trained with skip were on synthetic data and we think the performance for synthetic data uing skipping or replacing is similar because of the small amount of NaN values.
 
 
 Evaluation & Results
