@@ -12,7 +12,6 @@ Pipeline
 
     <img src="trained_models/Milestone2/figures/pipeline.png" width="600px">
     
-Given pedestrian trajecotries, we use a part of the trajectories as historical data and use the remaining data in the future to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. 
 
 
 Social Contrastive Learning
@@ -29,12 +28,14 @@ Contrastive learning used with negative data augmentation is said to increase th
 Contrastive Sampling
 --------
 
-The single-frame sampling algorithm wihch only samples locations at a specific time of the future follows the following steps: 
+The single-frame sampling algorithm (samples locations at a specific time of the future) follows the following steps: 
 
 * **Positive samples:** Given a fixed future horizon, we select the corresponding sample from the ground truth of primary agent and add some noise to it. 
 * **Negative samples:** Given a fixed future horizon, we select the corresponding sample from the ground truth of neighboring agents with local displacement and add some noise to them. It is worth mentioning that treating negative samples was more challenging, as the number of neighbors (agents other than the primary agent) might vary from scene to scene. In order to have the same tensor size for all scenes, we filled up scenes (with few neighbors and NaN's) with random samples from neighbors of the same scene. This shouldn't change the overall outcome, as we are randomly assigning a higher weight to a neighbor.
 
-In the figure below we plotted the trajectories of the pedestrians and added the sampling at the time horizon in the plot. In red nine negative samples per neighbour are shown, while the green point shows the positive sample. Remember for each scene one primary pedestrian and several neighbours are chosen. The trajectroy of the primary gives the postive sample and the trajectories of the neigbours give the negative samples. In addition to that, the observed and the future trajectory as well as the horizon (here horizon = 4) are shown.
+The multi-frame sampling is very silimar. The difference is that samples are spatial-temporal events at various time steps of the future. 
+
+In the figure below we plotted the raw trajectories of the pedestrians as well as our samples at the desired time horizon. Nine negative samples per neighbour in red dot are shown, while the green point shows the positive sample. Remember for each scene one primary pedestrian and several neighbours are chosen. The trajectroy of the primary gives the postive sample and the trajectories of the neigbours give the negative samples. In addition to that, the observed and the future trajectory as well as the horizon (here horizon = 4) are shown.
 
 .. raw:: html
 
@@ -45,6 +46,7 @@ Having created our samples, we performed the following steps for spatial NCE:
 
 * Lower dimensional embedding of observations (past trajectories) and positive / negative samples
 * Normalization of all lower dimensional embeddings
+* Computation of pairwise similarity
 * Computation of NCE Loss
 
 
@@ -56,7 +58,7 @@ While training, once our code performed without error, we investigate different 
 * contrastive temperature (for down or upscaling of similarity)
 * horizon 
 
-In general we trained the models on both data sets (real and synthetic data). The following combination were trained: 
+In general we trained the models on both data sets (real and synthetic data). The following combinations were trained: 
 
 * weight = 1, temperature = 0.1, horizon = 4, skip (synth), replace (real)
 * weight = 2, temperature = 0.1, horizon = 4, replace
@@ -64,7 +66,7 @@ In general we trained the models on both data sets (real and synthetic data). Th
 * weight = 1, temperature = 0.1, horizon = 8, replace
 * weight = 1, temperature = 0.1, horizon = 12, replace
 
-Note that in the first place we used the skipping technique (skipping of scenes with NaN's) to deal with NaN values. This didn't work for real data due to the high amount of NaN values. Therefore we changed to the replacement technique (replacement of NaN's with random samples from other neighbors). The models trained using skipping were trained on synthetic data and we think the performance for synthetic data uing skipping or replacing is similar (as in general we only had very few NaN's here).
+Note that in the first place we used the skipping technique (skipping the scenes with any NaN's) to deal with NaN values. This didn't work for real data due to the high amount of NaN values. Therefore we changed to the replacement technique (replacement of NaN's with random samples from other neighbors. If there are no neighbors or all existing neighbors have only NaN values, we replace them by (-10,-10)). The models trained using skipping were trained on synthetic data and we think the performance for synthetic data uing skipping or replacing is similar (as in general we only had very few NaN's here).
 
 
 Evaluation & Results
