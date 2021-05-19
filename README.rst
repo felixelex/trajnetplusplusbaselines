@@ -16,11 +16,11 @@ The spatial sampling algorithm follows the following steps:
 * **Positive samples:** Given a fixed horizon, we select the corresponding sample from the ground truth and add some noise to it. 
 * **Negative samples:** Treating negative samples was more challenging, as the number of neighbors (agents other than the primary agent) might vary from scene to scene. In order to have the same tensor size for all scenes, we filled scenes with few neighbors and NaN's up with random samples from neighbors of the same scene. This shouldn't change the overall outcome, as we are randomly assigning a higher weight to a neighbor.
 
-The picture below shows a sample situation for a horizon t=4:
+In the figure below we plotted the trajectories of the pedestrians and added the sampling at the time horizon in the plot. In red there are the nine negative sample per neighbour and the green point shows the positive sample. Remember for each scene one primary pedestrian and several neighbours are chosen. The trajectroy of the primary gives the postive sample and the trajectories of the neigbours give the negative samples. In addition to that, the observed and the future trajectory as well as the horizon (here horizon = 4) are shown.
 
 .. raw:: html
 
-    <img src="trained_models/figures/example_sampling.png" width="300px">
+    <img src="trained_models/Milestone2/figures/data_sampling_synth_data.jpeg" width="600px">
 
 
 Having created our samples, we performed the following steps for spatial NCE:
@@ -28,6 +28,16 @@ Having created our samples, we performed the following steps for spatial NCE:
 * Lower dimension embedding of observations (past trajectories) and positive / negative samples
 * Normalization of all lower dimensional embeddings
 * Computation of NCE Loss
+
+Social Contrastive Learning
+--------
+
+Contrastive learning used with negative data augmentation has been said to increase the robustness of forecasting models. In the data of pedestrian trajecotries, we define some as hsitorical data and use the remaining data to create positive and negative samples. For that we choose a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
+
+.. raw:: html
+
+    <img src="trained_models/Milestone2/figures/SCL_negative_data_augmentation.png" width="600px">
+
 
 
 Training
