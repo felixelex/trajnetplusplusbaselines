@@ -16,7 +16,7 @@ Pipeline
 Social Contrastive Learning
 --------
 
-Contrastive learning used with negative data augmentation is said to increase the robustness of the neural motion models. Given pedestrian trajecotries, we us a part of the trajectory as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
+Contrastive learning used with negative data augmentation is said to increase the robustness of the neural motion models. Given pedestrian trajecotries, we use a part of the trajectories as historical data and use the remaining data in the future to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. The basic idea of contrastive learning is to use a simple similarity measure between our learned embeddings (positive and negative sampl) to approximate the preferred neighborhood relationships. The samlping strategy in *social* contrastive learning is based on our domain knowledge of socially unfavorable events in the multi-agent context, which observed that it is typically forbidden or uncomfortable for multiple agents to visit the same or adjacent places simultaneously.
 
 .. raw:: html
 
