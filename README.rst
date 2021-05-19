@@ -66,17 +66,28 @@ Note that in the first place we used the skipping technique to deal with NaN val
 Evaluation & Results
 --------------------
 
+Learning Curves
++++++++++++++++
+
+**Training set:** Real data
+
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/real_data_learning_curves.png" width="400px">
 
+The above figure shows the learning curves of all 5 models which have been trained on the real data set. The curves look very similar for the firs 4 models. The 5th model has been has been pretrained for 25 epochs on synth_data. As we didn't reset the learning rate, it used a much lower learning rate as the other models. Furthermore, considering the high initial loss, we can make the assumption that training on synth_data does not generalize very well to real_data.
 
+**Training set:** Synth data
 
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/synth_data_learning_curves.png" width="400px">
 
+We trained 4 different models on synth_data, although unfortunately only 2 have been trained up to epoch 25 (in order to avoid to extensive computation times). As the use of different parameters effects the way the loss has been computed, we can't draw any conclusions directly from this plot but rather have to consider the evaluation metrics.
 
+
+Evaluation
+++++++++++
 
 
 
