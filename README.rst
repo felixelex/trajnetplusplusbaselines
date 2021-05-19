@@ -94,8 +94,6 @@ We trained 4 different models on synth_data, although unfortunately only 2 have 
 Evaluation of synthetic dataset models on five_parallel_synth
 ++++++++++
 
-Synth data:
-
 .. raw:: html
 
     <img src="trained_models/Milestone2/figures/synth_data_eval.jpg" width="800px">
