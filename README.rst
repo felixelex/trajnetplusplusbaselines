@@ -114,7 +114,12 @@ In the table below, for each model the hyperparameters are given and the evaluat
 | 1          | 4          | 0.1         | multi    | 1.220 | 4.470 |
 +------------+------------+-------------+----------+-------+-------+
 
+From these results we can conclude the following on the hyper parameter tuning: 
 
+* augmenting the temperature to 0.2 does not increase the performance.
+* augmenting the time horizon does decrease the overall performance of the model, however for h = 12 we find that the collision test actually gets better.
+* augmenting contrastive weight form 1 to 2, decreases the model’s performance. 
+* and applying the sampling strategy multi increases the FDE and decreases the Col-I.
 
 
 
