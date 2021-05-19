@@ -91,7 +91,7 @@ Real data:
 
 .. raw:: html
 
-    <img src="trained_models/Milestone2/figures/synth_data_eval.jpg" width="600px">
+    <img src="trained_models/Milestone2/figures/synth_data_eval.jpg" width="800px">
 
 
 
