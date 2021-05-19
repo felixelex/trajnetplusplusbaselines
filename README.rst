@@ -8,7 +8,7 @@ In this second milestone, we implemented **Social NCE** based on `this paper <ht
 Social Contrastive Learning
 --------
 
-Contrastive learning used with negative data augmentation has been said to increase the robustness of forecasting models. In the data of pedestrian trajecotries, we define some as hsitorical data and use the remaining data to create positive and negative samples. For that we choose a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
+Contrastive learning used with negative data augmentation is said to increase the robustness of forecasting models. Given pedestrian trajecotries, we us a part as historical data and use the remaining data to create positive and negative samples. We decide on a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
 
 .. raw:: html
 
@@ -44,12 +44,9 @@ Training
 --------
 While training, once our code performed without error, we investigate the different hyperparameters:
 
-* contrastive weights
-* temperature for down or upscaling the similarity
-* horizon
-* some more?!
-
-In our analysis, we include the effect of different temperature, different contrastive weights, and different time horizons. 
+* contrastive weight (relative weight of NCE loss compared to the normal loss)
+* contrastive temperature (for down or upscaling of similarity)
+* horizon 
 
 In general we trained the models on both data sets (real and synthetic data). The following combination were trained: 
 
