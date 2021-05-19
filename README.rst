@@ -62,7 +62,9 @@ Note that in the first place we used the skipping technique to deal with NaN val
 Evaluation & Results
 --------------------
 
+.. raw:: html
 
+    <img src="trained_models/Milestone2/figures/real_data_learning_curves.png" width="400px">
 
 
 
