@@ -10,15 +10,8 @@ Pipeline
 
 .. raw:: html
 
-    <img src="trained_models/Milestone2/figures/pipeline.png" width="550px">
-
-.. raw:: html
-
-    <img src="trained_models/Milestone2/figures/pipeline.png" width="500px">
-
-.. raw:: html
-
     <img src="trained_models/Milestone2/figures/pipeline.png" width="600px">
+    
     
 Social Contrastive Learning
 --------
