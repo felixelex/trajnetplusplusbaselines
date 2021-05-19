@@ -39,16 +39,6 @@ Having created our samples, we performed the following steps for spatial NCE:
 * Normalization of all lower dimensional embeddings
 * Computation of NCE Loss
 
-Social Contrastive Learning
---------
-
-Contrastive learning used with negative data augmentation has been said to increase the robustness of forecasting models. In the data of pedestrian trajecotries, we define some as hsitorical data and use the remaining data to create positive and negative samples. For that we choose a primary pedestrian and some neighbours for each scene. As shown in the image we want to predict the trajectory of the primary pedestrian and use the position of the neighbours and their sourroundings to tell the model which future steps are not a good choice. 
-
-.. raw:: html
-
-    <img src="trained_models/Milestone2/figures/SCL_negative_data_augmentation.png" width="600px">
-
-
 
 Training
 --------
