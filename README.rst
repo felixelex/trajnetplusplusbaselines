@@ -95,7 +95,7 @@ Real data:
 
 
 
-In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. We can see that compared to Milestone 1 we had for our best model FDE = and Col-I = , we can reach FDE = 1.200 and Col-I = 4.710 with contrastive learning!
+In the table below, for each model the hyperparameters are given and the evaluation score is the one from AI crowd. We can see that compared to Milestone 1 we had for our best model FDE = 1.210 and Col-I = 7.220, we can reach FDE = 1.200 and Col-I = 4.710 with contrastive learning!
 
 
 +------------+------------+-------------+----------+-------+-------+
@@ -124,6 +124,11 @@ From these results we can conclude the following on the hyper parameter tuning:
 
 
 
+
+AICrowd submission
+==================
+
+Our AICrowd submission can be found here: `Link <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/138580>`_
 
 
 
