@@ -12,7 +12,7 @@ import trajnetplusplustools
 class goalModel(torch.nn.Module):
     """ Model that learns predicting the goal destination of actors. As we are using multimodel SGAN, we also need multimodal goals.
     During training, the ground truth can be used to calculate the loss. """
-    def __init__(self):
+    def __init__(self, in_dim, out_dim):
         super(goalModel, self).__init__()
         # TODO: Write this class with all necessary functions
         raise NotImplementedError 
@@ -73,8 +73,7 @@ class goalPredictor(object):
         ## Return Dictionary of predictions. Each key corresponds to one mode
         return multimodal_goals
 
-
-        
+       
 class goalLoss(torch.nn.Module):
     """ Calculating the loss that we want to minimize during training. As we have multimodal goals, we maybe should use the L2 norm
     of the diffence between the ground truth and the goal_prediction closest to the ground truth. But other ideas are welcome :) """

@@ -60,10 +60,14 @@ class GoalsTrainer(object):
                          'optimizer': self.optimizer.state_dict(),
                          'lr_scheduler': self.lr_scheduler.state_dict()}
                 goalPredictor(self.model).save(state, out + '.epoch{}'.format(epoch))
-            train_goals = extractGroundTruthGoals(train_scenes)
+            
+            # TODO: Check if goal file exist. If not, use get_dist function to create them.
+            # train_goals = SOME_FUNCTION(train_scenes)
+            
             self.train(train_scenes, train_goals, epoch)
             if self.val_flag:
-                val_goals = extractGroundTruthGoals(val_scenes)
+                
+                # TODO: Check if goal file exist. If not, use get_dist function to create them.                
                 self.val(val_scenes, val_goals, epoch)
 
         state = {'epoch': epoch + 1, 'state_dict': self.model.state_dict(),
