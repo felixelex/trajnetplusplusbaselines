@@ -1,4 +1,4 @@
-"""Command line tool to train an SGAN model + goal model."""
+"""Command line tool to train goal model."""
 
 import argparse
 import logging
@@ -17,19 +17,12 @@ import trajnetplusplustools
 
 from .. import augmentation
 from ..lstm.loss import PredictionLoss, L2Loss
-from ..lstm.loss import gan_d_loss, gan_g_loss # variety_loss
-from ..lstm.gridbased_pooling import GridBasedPooling
-from ..lstm.non_gridbased_pooling import NN_Pooling, HiddenStateMLPPooling, AttentionMLPPooling, DirectionalMLPPooling
-from ..lstm.non_gridbased_pooling import NN_LSTM, TrajectronPooling, SAttention_fast
-from ..lstm.more_non_gridbased_pooling import NMMP
-from .sgan import SGAN, drop_distant, SGANPredictor
-from .sgan import LSTMGenerator, LSTMDiscriminator
 from .. import __version__ as VERSION
 
+from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
-from ..lstm.data_load_utils import prepare_data
 
-from .goals import goalModel, goalLoss, extractGroundTruthGoals, goalPredictor
+from .goals import goalModel, goalLoss, prepare_goals_data, goalPredictor
 
 
 class GoalsTrainer(object):
@@ -38,7 +31,7 @@ class GoalsTrainer(object):
                  val_flag=True):
         self.model = model if model is not None else goalModel("???")
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(
-                           model.generator.parameters(), lr=1e-3, weight_decay=1e-4)
+                           model.parameters(), lr=1e-3, weight_decay=1e-4)
         self.lr_scheduler = lr_sheduler if lr_sheduler is not None else \
                               torch.optim.lr_scheduler.StepLR(optimizer, 10)
                               
@@ -256,8 +249,8 @@ class GoalsTrainer(object):
         targets = batch_scene[self.obs_length:self.seq_length] - batch_scene[self.obs_length-1:self.seq_length-1]
 
         rel_output_list, outputs, scores_real, scores_fake = self.model(observed, batch_scene_goal, batch_split, prediction_truth,
-                                                                        step_type=step_type, pred_length=self.pred_length)
-        loss = self.criterion(rel_output_list, targets, batch_split, scores_fake, scores_real, step_type)
+                                                                        pred_length=self.pred_length)
+        loss = self.criterion(rel_output_list, targets, batch_split, scores_fake, scores_real)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -378,8 +371,8 @@ def main(epochs=15):
     args.path = 'DATA_BLOCK/' + args.path
     
     ## Prepare data
-    train_scenes, train_goals, _ = prepare_data(args.path, subset='/train/', sample=args.sample, goals=args.goals)
-    val_scenes, val_goals, val_flag = prepare_data(args.path, subset='/val/', sample=args.sample, goals=args.goals)
+    train_scenes, train_goals, _ = prepare_goals_data(args.path, subset='/train/', sample=args.sample)
+    val_scenes, val_goals, val_flag = prepare_goals_data(args.path, subset='/val/', sample=args.sample)
     
     ## pretrained pool model (if any)
     pretrained_pool = None
