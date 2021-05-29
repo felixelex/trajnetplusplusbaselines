@@ -35,7 +35,7 @@ class GoalsTrainer(object):
         self.lr_scheduler = lr_sheduler if lr_sheduler is not None else \
                               torch.optim.lr_scheduler.StepLR(optimizer, 10)
                               
-        self.criterion = criterion if criterion is not None else goalLoss("???")
+        self.criterion = criterion if criterion is not None else L2Loss()
         self.device = device if device is not None else torch.device('cpu')
         self.model = self.model.to(self.device)
         self.criterion = self.criterion.to(self.device)
@@ -75,6 +75,33 @@ class GoalsTrainer(object):
     def get_lr(self):
         for param_group in self.optimizer.param_groups:
             return param_group['lr']
+        
+    def goal_variety_loss(self, inputs, target):
+        """ Variety loss calculation for goalModel
+
+        Parameters
+        ----------
+        inputs : Tensor [batch_size, k, 2]
+            Predicted goals of primary actor.
+        target : Tensor [batch_size, 2]
+            Groundtruth goal coordinates of primary pedestrians of each scene
+        
+        Returns
+        -------
+        loss : Tensor [1,]
+            variety loss
+        """
+        
+        # Broadcasting target to right shape
+        target = target[:, None, :]
+        
+        # Loss per goal (criterion should be eg. L2norm)
+        goal_loss = self.criterion(inputs, target)
+        
+        loss = torch.min(goal_loss, dim=1)
+        loss = torch.sum(loss)
+        return loss
+        
         
     def train(self, scenes, epoch):
         start_time = time.time()

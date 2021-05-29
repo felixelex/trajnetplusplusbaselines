@@ -96,14 +96,6 @@ class goalPredictor(object):
         ## Return Dictionary of predictions. Each key corresponds to one mode
         return multimodal_goals
 
-       
-class goalLoss(torch.nn.Module):
-    """ Calculating the loss that we want to minimize during training. As we have multimodal goals, we maybe should use the L2 norm
-    of the diffence between the ground truth and the goal_prediction closest to the ground truth. But other ideas are welcome :) """
-    def __init__(self):
-        super(goalLoss, self).__init__()
-        # TODO: Write this class with all necessary functions
-        raise NotImplementedError
 
 
 def get_goals(scene, obs_length, pred_length):
