@@ -22,20 +22,20 @@ from .. import __version__ as VERSION
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, goalLoss, prepare_goals_data, goalPredictor, get_goals
+from .goals import goalModel, L2_goals_Loss, prepare_goals_data, goalPredictor, get_goals
 
 
 class GoalsTrainer(object):
-    def __init__(self, model=None, optimizer=None, lr_sheduler=None, criterion=None, device = None, batch_size=8, 
+    def __init__(self, model=None, optimizer=None, lr_scheduler=None, criterion=None, device = None, batch_size=8, 
                  obs_length=9, pred_length=12, augment=True, normalize_scene=False, save_every=1, start_length=0, 
                  val_flag=True):
         self.model = model if model is not None else goalModel("???")
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(
                            model.parameters(), lr=1e-3, weight_decay=1e-4)
-        self.lr_scheduler = lr_sheduler if lr_sheduler is not None else \
+        self.lr_scheduler = lr_scheduler if lr_scheduler is not None else \
                               torch.optim.lr_scheduler.StepLR(optimizer, 10)
                               
-        self.criterion = criterion if criterion is not None else L2Loss()
+        self.criterion = criterion if criterion is not None else L2_goals_Loss()
         self.device = device if device is not None else torch.device('cpu')
         self.model = self.model.to(self.device)
         self.criterion = self.criterion.to(self.device)
@@ -416,7 +416,7 @@ def main(epochs=15):
     start_epoch = 0
     
     # Loss Criterion
-    criterion = goalLoss()
+    criterion = L2Loss()
     
     # train
     if args.load_state:

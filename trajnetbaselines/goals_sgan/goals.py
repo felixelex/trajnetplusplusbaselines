@@ -43,9 +43,28 @@ class goalModel(torch.nn.Module):
         x = self.linear_out(x)        
         return x
     
+class L2_goals_Loss(torch.nn.Module):
+    """ L2 Loss for goal predictions
+
+    """
+    def __init__(self, keep_batch_dim=False):
+        super(L2_goals_Loss, self).__init__()
+        self.loss = torch.nn.MSELoss(reduction='none')
+        self.keep_batch_dim = keep_batch_dim
+        self.loss_multiplier = 100
+        
+    def forward(self, inputs, targets):
+        
+        loss = self.loss(inputs, targets)
+        
+        if self.keep_batch_dim:
+            return loss.mean(dim=0).mean(dim=1) * self.loss_multiplier
+        
+        return torch.mean(loss) * self.loss_multiplier
    
-   
-   
+
+
+
 class goalPredictor(object):
     """ Class that is used to make predictions (eg. for validation or when creating the prediction)"""
     def __init__(self, model):
