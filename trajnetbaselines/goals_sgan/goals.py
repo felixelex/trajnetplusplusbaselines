@@ -6,19 +6,33 @@ import pickle
 import trajnetplusplustools
 
 
-
-
-
 class goalModel(torch.nn.Module):
     """ Model that learns predicting the goal destination of actors. As we are using multimodel SGAN, we also need multimodal goals.
     During training, the ground truth can be used to calculate the loss. """
     def __init__(self, in_dim, out_dim):
         super(goalModel, self).__init__()
         # TODO: Write this class with all necessary functions
-        raise NotImplementedError 
+        
+        # DUMMY NETWORK
+        hidden_dim = 25
+        
+        self.linear_in = torch.nn.Linear(in_dim, hidden_dim)
+        self.linear_hid = torch.nn.Linear(hidden_dim, hidden_dim)
+        self.linear_out = torch.nn.Linear(hidden_dim, out_dim)
+         
    
-    def forward(self):
-        raise NotImplementedError
+    def forward(self, x):
+        # DUMMY NETWORK
+        x = self.linear_in(x)
+        x = torch.nn.ReLU(x)
+        x = self.linear_hid(x)
+        x = torch.nn.ReLU(x)
+        x = self.linear_hid(x)
+        x = torch.nn.ReLU(x)
+        x = self.linear_hid(x)
+        x = torch.nn.ReLU(x)
+        x = self.linear_out(x)        
+        return x
     
    
    
@@ -83,7 +97,14 @@ class goalLoss(torch.nn.Module):
         raise NotImplementedError
 
 
-def prepare_goals_data(path, subset='/train/', sample=1.0, goals=True):
+def get_goals(scene):
+    """ Given a scene, extract the goal from it. """
+    print("get_goals function")
+    print(scene)
+
+
+
+def prepare_goals_data(path, subset='/train/', sample=1.0):
     """ Prepares the train/val scenes and corresponding goals 
     
     Parameters
@@ -115,10 +136,9 @@ def prepare_goals_data(path, subset='/train/', sample=1.0, goals=True):
             exit()
         if 'val' in subset:
             print("Validation folder does NOT exist")
-            return None, None, False
+            return None, False
 
     ## read goal files
-    all_goals = {}
     all_scenes = []
 
     ## List file names
@@ -128,12 +148,7 @@ def prepare_goals_data(path, subset='/train/', sample=1.0, goals=True):
         reader = trajnetplusplustools.Reader(path + subset + file + '.ndjson', scene_type='paths')
         ## Necessary modification of train scene to add filename
         scene = [(file, s_id, s) for s_id, s in reader.scenes(sample=sample)]
-        if goals:
-            goal_dict = pickle.load(open('goal_files/' + subset + file +'.pkl', "rb"))
-            ## Get goals corresponding to train scene
-            all_goals[file] = {s_id: [goal_dict[path[0].pedestrian] for path in s] for _, s_id, s in scene}
+        
         all_scenes += scene
 
-    if goals:
-        return all_scenes, all_goals, True
-    return all_scenes, None, True
+    return all_scenes, True

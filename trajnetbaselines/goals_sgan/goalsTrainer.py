@@ -22,7 +22,7 @@ from .. import __version__ as VERSION
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, goalLoss, prepare_goals_data, goalPredictor
+from .goals import goalModel, goalLoss, prepare_goals_data, goalPredictor, get_goals
 
 
 class GoalsTrainer(object):
@@ -60,15 +60,11 @@ class GoalsTrainer(object):
                          'optimizer': self.optimizer.state_dict(),
                          'lr_scheduler': self.lr_scheduler.state_dict()}
                 goalPredictor(self.model).save(state, out + '.epoch{}'.format(epoch))
+                        
+            self.train(train_scenes, epoch)
             
-            # TODO: Check if goal file exist. If not, use get_dist function to create them.
-            # train_goals = SOME_FUNCTION(train_scenes)
-            
-            self.train(train_scenes, train_goals, epoch)
-            if self.val_flag:
-                
-                # TODO: Check if goal file exist. If not, use get_dist function to create them.                
-                self.val(val_scenes, val_goals, epoch)
+            if self.val_flag:               
+                self.val(val_scenes, epoch)
 
         state = {'epoch': epoch + 1, 'state_dict': self.model.state_dict(),
                  'optimizer': self.optimizer.state_dict(),
@@ -80,7 +76,7 @@ class GoalsTrainer(object):
         for param_group in self.optimizer.param_groups:
             return param_group['lr']
         
-    def train(self, scenes, goals, epoch):
+    def train(self, scenes, epoch):
         start_time = time.time()
 
         print('epoch', epoch)
@@ -102,10 +98,8 @@ class GoalsTrainer(object):
             scene = trajnetplusplustools.Reader.paths_to_xy(paths)
 
             ## get goals
-            if goals is not None:
-                scene_goal = np.array(goals[filename][scene_id])
-            else:
-                scene_goal = np.array([[0, 0] for path in paths])
+            # TODO: extract goal from scene
+            scene_goal = get_goals()
 
             ## Drop Distant
             scene, mask = drop_distant(scene)
@@ -180,12 +174,11 @@ class GoalsTrainer(object):
             # make new scene
             scene = trajnetplusplustools.Reader.paths_to_xy(paths)
 
-            ## get goals
-            if goals is not None:
-                # scene_goal = np.array([goals[path[0].pedestrian] for path in paths])
-                scene_goal = np.array(goals[filename][scene_id])
-            else:
-                scene_goal = np.array([[0, 0] for path in paths])
+            # TODO: extract goal from scene
+            
+            # scene_goal = ....
+            
+            scene_goal = np.array(scene_goal)
 
             ## Drop Distant
             scene, mask = drop_distant(scene)
@@ -375,12 +368,9 @@ def main(epochs=15):
     args.path = 'DATA_BLOCK/' + args.path
     
     ## Prepare data
-    train_scenes, train_goals, _ = prepare_goals_data(args.path, subset='/train/', sample=args.sample)
-    val_scenes, val_goals, val_flag = prepare_goals_data(args.path, subset='/val/', sample=args.sample)
-    
-    ## pretrained pool model (if any)
-    pretrained_pool = None
-    
+    train_scenes, _ = prepare_goals_data(args.path, subset='/train/', sample=args.sample)
+    val_scenes, val_flag = prepare_goals_data(args.path, subset='/val/', sample=args.sample)
+        
     # Goal model
     model = goalModel("...")
     
@@ -415,7 +405,7 @@ def main(epochs=15):
                       batch_size=args.batch_size, obs_length=args.obs_length, pred_length=args.pred_length,
                       augment=args.augment, normalize_scene=args.normalize_scene, save_every=args.save_every,
                       start_length=args.start_length, val_flag=val_flag)
-    trainer.loop(train_scenes, val_scenes, train_goals, val_goals, args.output, epochs=args.epochs, start_epoch=start_epoch)
+    trainer.loop(train_scenes, val_scenes, args.output, epochs=args.epochs, start_epoch=start_epoch)
 
 
 if __name__ == '__main__':
