@@ -125,12 +125,16 @@ class GoalsTrainer(object):
             scene = trajnetplusplustools.Reader.paths_to_xy(paths)
 
             ## get goals
-            # TODO: extract goal from scene
             scene_goal = get_goals(scene, self.obs_length, self.pred_length)
 
             ## Drop Distant
             scene, mask = drop_distant(scene)
             scene_goal = scene_goal[mask]
+
+            """ Format:
+            scene_goal  [n_actors, 2]
+            scene       [time_steps, num_actors, 2]
+            """
 
             ##process scene
             if self.normalize_scene:

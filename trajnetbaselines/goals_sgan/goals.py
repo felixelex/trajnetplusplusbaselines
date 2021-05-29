@@ -155,7 +155,7 @@ class goalPredictor(object):
 
 
 def get_goals(scene, obs_length, pred_length):
-    """ Given a scene, extract the goal from it. 
+    """ Given a scene, extract the goal from each actor. 
     
     Parameters
     ----------
@@ -163,11 +163,10 @@ def get_goals(scene, obs_length, pred_length):
     
     Returns
     -------
-    goal: Tensor [2,]
+    goal: Tensor [n_actors, 2]
     """
     
-    goal = scene[-1,0,:]
-    print(goal)
+    goal = scene[-1,:,:]
     return goal
 
 
