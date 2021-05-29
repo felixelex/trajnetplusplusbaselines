@@ -9,7 +9,16 @@ import trajnetplusplustools
 class goalModel(torch.nn.Module):
     """ Model that learns predicting the goal destination of actors. As we are using multimodel SGAN, we also need multimodal goals.
     During training, the ground truth can be used to calculate the loss. """
-    def __init__(self, in_dim, out_dim):
+    def __init__(self, in_dim, out_dim, k):
+        """Initialization 
+        
+        Parameters
+        ----------
+        k: integer
+            Number of modes 
+        
+        """
+            
         super(goalModel, self).__init__()
         # TODO: Write this class with all necessary functions
         
@@ -97,10 +106,11 @@ class goalLoss(torch.nn.Module):
         raise NotImplementedError
 
 
-def get_goals(scene):
+def get_goals(scene, obs_length, pred_length):
     """ Given a scene, extract the goal from it. """
     print("get_goals function")
     print(scene)
+    return None
 
 
 

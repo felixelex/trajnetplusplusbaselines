@@ -99,7 +99,7 @@ class GoalsTrainer(object):
 
             ## get goals
             # TODO: extract goal from scene
-            scene_goal = get_goals()
+            scene_goal = get_goals(scene, self.obs_length, self.pred_length)
 
             ## Drop Distant
             scene, mask = drop_distant(scene)
@@ -327,6 +327,15 @@ def main(epochs=15):
     pretrain.add_argument('--nonstrict-load-state', default=None,
                           help='load a pickled state dictionary before training')
     
+    ## Hyperparameters
+    hyperparameters = parser.add_argument_group('hyperparameters')
+    hyperparameters.add_argument('--lr', default=1e-3, type=float,
+                                 help='initial learning rate')
+    hyperparameters.add_argument('--k', type=int, default=1,
+                                 help='number of samples for variety loss')
+    hyperparameters.add_argument('--step_size', default=10, type=int,
+                                 help='step_size of lr scheduler')
+    
     args = parser.parse_args()
     
     ## Fixed set of scenes if sampling
@@ -371,8 +380,8 @@ def main(epochs=15):
     train_scenes, _ = prepare_goals_data(args.path, subset='/train/', sample=args.sample)
     val_scenes, val_flag = prepare_goals_data(args.path, subset='/val/', sample=args.sample)
         
-    # Goal model
-    model = goalModel("...")
+    # Goal model (TO BE MODIFIED)
+    model = goalModel(in_dim=2, out_dim=2, k=args.k)
     
     # Optimizer and Scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
