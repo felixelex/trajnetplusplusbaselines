@@ -69,12 +69,11 @@ class Trainer(object):
         if goalModel_path == None:
             raise ValueError("Please specify location of trained goalModel.")
         else:
+            goalModel_path = 'OUTPUT_BLOCK/{}'.format(goalModel_path)
             print("Loading goalModel Dict")
             with open(goalModel_path, 'rb') as f:
-                checkpoint = torch.load(f)
-        
-        self.goalModel = goal_model.load_state_dict(checkpoint['state_dict'])
-        
+                self.goalModel = torch.load(f)
+
 
     def loop(self, train_scenes, val_scenes, train_goals, val_goals, out, epochs=35, start_epoch=0):
         for epoch in range(start_epoch, epochs):
