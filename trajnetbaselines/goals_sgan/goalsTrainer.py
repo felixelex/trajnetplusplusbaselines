@@ -29,7 +29,7 @@ class GoalsTrainer(object):
     def __init__(self, model=None, optimizer=None, lr_scheduler=None, criterion=None, device = None, batch_size=8, 
                  obs_length=9, pred_length=12, augment=True, normalize_scene=False, save_every=1, start_length=0, 
                  val_flag=True):
-        self.model = model if model is not None else goalModel("???")
+        self.model = model if model is not None else goalModel()
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(
                            model.parameters(), lr=1e-3, weight_decay=1e-4)
         self.lr_scheduler = lr_scheduler if lr_scheduler is not None else \
@@ -274,7 +274,8 @@ class GoalsTrainer(object):
 
         goal_pred = self.model(batch_scene, batch_split, obs_len=self.obs_length)
         # goal_pred [num_scenes, k, out_dim=2]
-        loss = self.criterion(goal_pred, goal_gt)
+        loss = self.goal_variety_loss(goal_pred, goal_gt)
+        # loss = self.criterion(goal_pred, goal_gt)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -358,7 +359,7 @@ def main(epochs=15):
     hyperparameters = parser.add_argument_group('hyperparameters')
     hyperparameters.add_argument('--lr', default=1e-3, type=float,
                                  help='initial learning rate')
-    hyperparameters.add_argument('--k', type=int, default=1,
+    hyperparameters.add_argument('--k', type=int, default=3,
                                  help='number of samples for variety loss')
     hyperparameters.add_argument('--step_size', default=10, type=int,
                                  help='step_size of lr scheduler')
