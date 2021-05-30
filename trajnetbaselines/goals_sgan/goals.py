@@ -233,8 +233,6 @@ class goalLoss(torch.nn.Module):
         """
         
         gt = gt[:,None,:]
-        
         L2 = (pred - gt).norm(p=2, dim=2)
-        
         assert L2.shape == pred.shape[:-1], "Size missmatch"
         return L2

@@ -76,33 +76,7 @@ class GoalsTrainer(object):
     def get_lr(self):
         for param_group in self.optimizer.param_groups:
             return param_group['lr']
-        
-    # def goal_variety_loss(self, inputs, target):
-    #     """ Variety loss calculation for goalModel
-
-    #     Parameters
-    #     ----------
-    #     inputs : Tensor [batch_size, k, 2]
-    #         Predicted multiple goals of primary actor.
-    #     target : Tensor [batch_size, 2]
-    #         Groundtruth goal coordinates of primary pedestrians of each scene
-        
-    #     Returns
-    #     -------
-    #     loss : Tensor [1,]
-    #         variety loss
-    #     """
-        
-    #     # Broadcasting target to right shape
-    #     target = target[:, None, :]
-        
-    #     # Loss per goal (criterion should be eg. L2norm)
-    #     goal_loss = self.criterion(inputs, target) # broadcasting (batch_size, k, 2)
-        
-    #     loss = torch.min(goal_loss, dim=1)
-    #     loss = torch.sum(loss)
-    #     return loss
-        
+              
         
     def train(self, scenes, epoch):
         start_time = time.time()
@@ -173,7 +147,7 @@ class GoalsTrainer(object):
                 batch_scene_goal = []
                 batch_split = [0]
 
-            if (scene_i + 1) % (10*self.batch_size) == 0:
+            if (scene_i + 1) % (100*self.batch_size) == 0:
                 self.log.info({
                     'type': 'train',
                     'epoch': epoch, 'batch': scene_i, 'n_batches': len(scenes),
@@ -193,7 +167,7 @@ class GoalsTrainer(object):
         })
 
 
-    def val(self, scenes, goals, epoch):
+    def val(self, scenes, epoch):
         eval_start = time.time()
 
         val_loss = 0.0
@@ -209,12 +183,9 @@ class GoalsTrainer(object):
             # make new scene
             scene = trajnetplusplustools.Reader.paths_to_xy(paths)
 
-            # TODO: extract goal from scene
+            ## get goals
+            scene_goal = get_goals(scene, self.obs_length, self.pred_length)
             
-            # scene_goal = ....
-            
-            scene_goal = np.array(scene_goal)
-
             ## Drop Distant
             scene, mask = drop_distant(scene)
             scene_goal = scene_goal[mask]
@@ -237,6 +208,9 @@ class GoalsTrainer(object):
                 batch_scene = torch.Tensor(batch_scene).to(self.device)
                 batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
+                
+                ## Select only goals of primary actor
+                batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
                 
                 loss_val_batch, loss_test_batch = self.val_batch(batch_scene, batch_scene_goal, batch_split)
                 val_loss += loss_val_batch
@@ -305,17 +279,10 @@ class GoalsTrainer(object):
             Validation loss of the batch when groundtruth of neighbours
             is not provided
         """
-
-        observed = batch_scene[self.start_length:self.obs_length]
-        prediction_truth = batch_scene[self.obs_length:].clone()  ## CLONE
-        targets = batch_scene[self.obs_length:self.seq_length] - batch_scene[self.obs_length-1:self.seq_length-1]
         
         with torch.no_grad():
-            rel_output_list, _, _, _ = self.model(observed, batch_scene_goal, batch_split,
-                                                  n_predict=self.pred_length, pred_length=self.pred_length)
-
-            ## top-k loss
-            loss = self.variety_loss(rel_output_list, targets, batch_split)
+            goal_pred = self.model(batch_scene, batch_split, obs_len=self.obs_length)
+            loss = self.criterion(goal_pred, batch_scene_goal)
 
         return 0.0, loss.item()
     
