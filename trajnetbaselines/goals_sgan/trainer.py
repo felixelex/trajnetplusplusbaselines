@@ -29,10 +29,13 @@ from .. import __version__ as VERSION
 from ..lstm.utils import center_scene, random_rotation
 from ..lstm.data_load_utils import prepare_data
 
+# Importing our code
+from .goals import goalModel, goalLoss, prepare_goals_data, get_goals
+
 class Trainer(object):
     def __init__(self, model=None, g_optimizer=None, g_lr_scheduler=None, d_optimizer=None, d_lr_scheduler=None,
                  criterion=None, device=None, batch_size=8, obs_length=9, pred_length=12, augment=True,
-                 normalize_scene=False, save_every=1, start_length=0, val_flag=True):
+                 normalize_scene=False, save_every=1, start_length=0, val_flag=True, goalModel_path=None):
         self.model = model if model is not None else SGAN()
         self.g_optimizer = g_optimizer if g_optimizer is not None else torch.optim.Adam(
                            model.generator.parameters(), lr=1e-3, weight_decay=1e-4)
@@ -60,6 +63,18 @@ class Trainer(object):
         self.normalize_scene = normalize_scene
 
         self.val_flag = val_flag
+        
+        # Initializing our goalModel
+        goal_model = goalModel()
+        if goalModel_path == None:
+            raise ValueError("Please specify location of trained goalModel.")
+        else:
+            print("Loading goalModel Dict")
+            with open(goalModel_path, 'rb') as f:
+                checkpoint = torch.load(f)
+        
+        self.goalModel = goal_model.load_state_dict(checkpoint['state_dict'])
+        
 
     def loop(self, train_scenes, val_scenes, train_goals, val_goals, out, epochs=35, start_epoch=0):
         for epoch in range(start_epoch, epochs):
@@ -435,6 +450,10 @@ def main(epochs=25):
     parser.add_argument('--normalize_scene', action='store_true',
                         help='rotate scene so primary pedestrian moves northwards at end of observation')
 
+    ## GoalModel
+    parser.add_argument('--goalModel_path', default=None,
+                        help='path to directory containing the trained goalModel')
+
     ## Loading pre-trained models
     pretrain = parser.add_argument_group('pretraining')
     pretrain.add_argument('--load-state', default=None,
@@ -509,6 +528,8 @@ def main(epochs=25):
                                  help='type of noise to be added')
     hyperparameters.add_argument('--k', type=int, default=1,
                                  help='number of samples for variety loss')
+
+
 
     args = parser.parse_args()
 
@@ -642,7 +663,7 @@ def main(epochs=25):
                       d_lr_scheduler=d_lr_scheduler, device=args.device, criterion=criterion,
                       batch_size=args.batch_size, obs_length=args.obs_length, pred_length=args.pred_length,
                       augment=args.augment, normalize_scene=args.normalize_scene, save_every=args.save_every,
-                      start_length=args.start_length, val_flag=val_flag)
+                      start_length=args.start_length, val_flag=val_flag, goalModel_path=args.goalModel_path)
     trainer.loop(train_scenes, val_scenes, train_goals, val_goals, args.output, epochs=args.epochs, start_epoch=start_epoch)
 
 
