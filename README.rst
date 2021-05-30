@@ -3,7 +3,7 @@
 Milestone 3: Multimodal Predictions & TrajNet++ Challenge
 =========================================================
 
-In this third milestone, we implemented a **Social Generative Adversial Neetwork (SGAN)** model using the TrajNet++ benchmark. After that we thought of another way to forecast pedestrian trajecotries, which is predicting goals for the pedestrians and thus creating more diverse trajectory forecasting. `This paper <https://openaccess.thecvf.com/content/ACCV2020/papers/Dendorfer_Goal-GAN_Multimodal_Trajectory_Prediction_Based_on_Goal_Position_Estimation_ACCV_2020_paper.pdf>`helped us to understand the goal-GAN structure and both models are again evaluated in `this AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
+In this third milestone, we implemented a **Social Generative Adversial Neetwork (SGAN)** model using the TrajNet++ benchmark. After that we thought of another way to forecast pedestrian trajecotries, which is predicting goals for the pedestrians and thus creating more diverse trajectory forecasting. `This paper <https://openaccess.thecvf.com/content/ACCV2020/papers/Dendorfer_Goal-GAN_Multimodal_Trajectory_Prediction_Based_on_Goal_Position_Estimation_ACCV_2020_paper.pdf>`_ helped us to understand the goal-GAN structure and both models are again evaluated in `this AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
 
 Generative Models
 -----------------
@@ -11,18 +11,28 @@ Generative Models
 Generative Models can generate diverse output, but they are often incapable to give realtistic are specially useful to capture the diverse set of possible trajectories, often called by multimodality. Given a past trajectory, there multiple possibilities of plausible future trajectories. In the method we want to apply, the possible destinations of a pedestrian shall be generated and give those plausible solutions. With that the chance that the model predicts at least one very good trajectory without collision is increased. 
 To visualize Dendorfer et al. have produced the following figure: 
 
+.. raw:: html
+
+    <img src="trained_models/Milestone3/figures/Goal_GAN_dendorfer.png" width="600px">
 
 The training is done in two steps. First the goal model is trained on the dataset and then it is used in the sgan model to predict goals for the pedestrian. The trajectory forecasting is then done in the sgan model.
 
 Goal Model
 ----------
 
+The goalModel consists of a LSTM network which predicts the goal destination of the primary pedestrian in the scene. During training the groundtruth is used to calculate the loss. We used the L2-norm variety loss for the goal trainer
 
 
 Goal Trainer
 ------------
 
-A goal basically defines the final destination of a pedestrian, therefor for each pedestrian the first goal corresponds simply to the last entry of 
+The goalsTrainer is used for the goalModel to predict the correct goals.
+For each scene, the goals of the primary pedestrian are selected and validated against the groundtruth.
+
+Results
+--------
+    - SGAN single mode, multi mode (k=3) 
+    - Goal-GAN
 
 
 
