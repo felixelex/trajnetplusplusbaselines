@@ -34,13 +34,7 @@ class goalModel(torch.nn.Module):
         self.linear1 = nn.Linear(hid_dim*num_layers, hid_dim)
         self.relu = nn.ReLU()
         self.linear2 = nn.Linear(hid_dim, out_dim*k)
-        
-#         # DUMMY NETWORK
-#         hidden_dim = 25
-        
-#         self.linear_in = torch.nn.Linear(in_dim, hidden_dim)
-#         self.linear_hid = torch.nn.Linear(hidden_dim, hidden_dim)
-#         self.linear_out = torch.nn.Linear(hidden_dim, out_dim)    
+         
    
     def forward(self, batch_scene, batch_split, obs_len=9):
         """ Forward pass, we ignore the inner relation of a scene, take num_tracks as batch size.
@@ -69,21 +63,8 @@ class goalModel(torch.nn.Module):
         output = output.reshape(batch_size, self.k, self.out_dim)
         
         return output
+
     
-#         # DUMMY NETWORK
-#         x = self.linear_in(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_hid(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_hid(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_hid(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_out(x)        
-#         return x
-
-
-
 class goalPredictor(object):
     """ Class that is used to make predictions (eg. for validation or when creating the prediction)"""
     def __init__(self, model):

@@ -34,13 +34,7 @@ class goalModel(torch.nn.Module):
         self.linear1 = nn.Linear(hid_dim*num_layers, hid_dim)
         self.relu = nn.ReLU()
         self.linear2 = nn.Linear(hid_dim, out_dim*k)
-        
-#         # DUMMY NETWORK
-#         hidden_dim = 25
-        
-#         self.linear_in = torch.nn.Linear(in_dim, hidden_dim)
-#         self.linear_hid = torch.nn.Linear(hidden_dim, hidden_dim)
-#         self.linear_out = torch.nn.Linear(hidden_dim, out_dim)    
+         
    
     def forward(self, batch_scene, batch_split, obs_len=9):
         """ Forward pass, we ignore the inner relation of a scene, take num_tracks as batch size.
@@ -69,39 +63,8 @@ class goalModel(torch.nn.Module):
         output = output.reshape(batch_size, self.k, self.out_dim)
         
         return output
+
     
-#         # DUMMY NETWORK
-#         x = self.linear_in(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_hid(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_hid(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_hid(x)
-#         x = torch.nn.ReLU(x)
-#         x = self.linear_out(x)        
-#         return x
-    
-class L2_goals_Loss(torch.nn.Module):
-    """ L2 Loss for goal predictions
-
-    """
-    def __init__(self, keep_batch_dim=False):
-        super(L2_goals_Loss, self).__init__()
-        self.loss = torch.nn.MSELoss(reduction='none')
-        self.keep_batch_dim = keep_batch_dim
-        self.loss_multiplier = 100
-        
-    def forward(self, inputs, targets):
-        
-        loss = self.loss(inputs, targets)
-        
-        if self.keep_batch_dim:
-            return loss.mean(dim=0).mean(dim=1) * self.loss_multiplier
-        
-        return torch.mean(loss) * self.loss_multiplier
-
-
 class goalPredictor(object):
     """ Class that is used to make predictions (eg. for validation or when creating the prediction)"""
     def __init__(self, model):
@@ -219,22 +182,3 @@ def prepare_goals_data(path, subset='/train/', sample=1.0):
         all_scenes += scene
 
     return all_scenes, True
-
-
-if __name__ == '__main__':
-    
-    print('create data')
-    batch_scene = torch.empty(21,40,2).uniform_(0,1)
-    batch_split = torch.Tensor([0,5,9,15,20,22,30,33,40])
-    targets = torch.ones(40,2)
-    
-    print('create model')
-    model = goalModel()
-    criterion = L2_goals_Loss()
-    
-    print('forward pass')
-    output = model(batch_scene, batch_split)
-    print(output.shape, targets.shape)
-    loss = criterion(output, targets[batch_split[:-1].tolist()][:,None,:])
-    print('loss=', loss)
-    
