@@ -342,7 +342,7 @@ def main(epochs=15):
 
     if not os.path.exists('OUTPUT_BLOCK/{}'.format(args.path)):
         os.makedirs('OUTPUT_BLOCK/{}'.format(args.path))
-    args.output = 'OUTPUT_BLOCK/{}/goalsModel_{}.pkl'.format(args.path, args.output)
+    args.output = 'OUTPUT_BLOCK/{}/goalsModel.pkl'.format(args.path)
     
     # configure logging
     from pythonjsonlogger import jsonlogger

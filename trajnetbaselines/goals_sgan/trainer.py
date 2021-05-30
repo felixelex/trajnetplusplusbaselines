@@ -75,7 +75,7 @@ class Trainer(object):
                 self.goalModel = torch.load(f)
 
 
-    def loop(self, train_scenes, val_scenes, train_goals, val_goals, out, epochs=35, start_epoch=0):
+    def loop(self, train_scenes, val_scenes, out, epochs=35, start_epoch=0):
         for epoch in range(start_epoch, epochs):
             if epoch % self.save_every == 0:
                 state = {'epoch': epoch, 'state_dict': self.model.state_dict(),
@@ -83,9 +83,9 @@ class Trainer(object):
                          'g_lr_scheduler': self.g_lr_scheduler.state_dict(),
                          'd_lr_scheduler': self.d_lr_scheduler.state_dict()}
                 SGANPredictor(self.model).save(state, out + '.epoch{}'.format(epoch))
-            self.train(train_scenes, train_goals, epoch)
+            self.train(train_scenes, epoch)
             if self.val_flag:
-                self.val(val_scenes, val_goals, epoch)
+                self.val(val_scenes, epoch)
 
         state = {'epoch': epoch + 1, 'state_dict': self.model.state_dict(),
                  'g_optimizer': self.g_optimizer.state_dict(), 'd_optimizer': self.d_optimizer.state_dict(),
@@ -98,7 +98,7 @@ class Trainer(object):
         for param_group in self.g_optimizer.param_groups:
             return param_group['lr']
 
-    def train(self, scenes, goals, epoch):
+    def train(self, scenes, epoch):
         start_time = time.time()
 
         print('epoch', epoch)
@@ -120,38 +120,31 @@ class Trainer(object):
             scene_start = time.time()
 
             ## make new scene
-            scene = trajnetplusplustools.Reader.paths_to_xy(paths)
-
-            ## get goals
-            if goals is not None:
-                scene_goal = np.array(goals[filename][scene_id])
-            else:
-                scene_goal = np.array([[0, 0] for path in paths])
+            scene = trajnetplusplustools.Reader.paths_to_xy(paths)         
 
             ## Drop Distant
             scene, mask = drop_distant(scene)
-            scene_goal = scene_goal[mask]
 
             ##process scene
             if self.normalize_scene:
-                scene, _, _, scene_goal = center_scene(scene, self.obs_length, goals=scene_goal)
+                scene, _, _, _ = center_scene(scene, self.obs_length)
             if self.augment:
-                scene, scene_goal = random_rotation(scene, goals=scene_goal)
+                scene = random_rotation(scene)
             
             ## Augment scene to batch of scenes
             batch_scene.append(scene)
             batch_split.append(int(scene.shape[1]))
-            batch_scene_goal.append(scene_goal)
+            # batch_scene_goal.append(scene_goal)
 
             if ((scene_i + 1) % self.batch_size == 0) or ((scene_i + 1) == len(scenes)):
                 ## Construct Batch
                 batch_scene = np.concatenate(batch_scene, axis=1)
-                batch_scene_goal = np.concatenate(batch_scene_goal, axis=0)
                 batch_split = np.cumsum(batch_split)
                 
                 batch_scene = torch.Tensor(batch_scene).to(self.device)
-                batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
+                                
+                batch_scene_goal = self.goalModel(batch_scene, batch_split).to(self.device)
 
                 preprocess_time = time.time() - scene_start
 
@@ -203,7 +196,7 @@ class Trainer(object):
             'time': round(time.time() - start_time, 1),
         })
 
-    def val(self, scenes, goals, epoch):
+    def val(self, scenes, epoch):
         eval_start = time.time()
 
         val_loss = 0.0
@@ -219,35 +212,26 @@ class Trainer(object):
             # make new scene
             scene = trajnetplusplustools.Reader.paths_to_xy(paths)
 
-            ## get goals
-            if goals is not None:
-                # scene_goal = np.array([goals[path[0].pedestrian] for path in paths])
-                scene_goal = np.array(goals[filename][scene_id])
-            else:
-                scene_goal = np.array([[0, 0] for path in paths])
-
             ## Drop Distant
             scene, mask = drop_distant(scene)
-            scene_goal = scene_goal[mask]
 
             ##process scene
             if self.normalize_scene:
-                scene, _, _, scene_goal = center_scene(scene, self.obs_length, goals=scene_goal)
+                scene, _, _, _ = center_scene(scene, self.obs_length)
 
             ## Augment scene to batch of scenes
             batch_scene.append(scene)
             batch_split.append(int(scene.shape[1]))
-            batch_scene_goal.append(scene_goal)
 
             if ((scene_i + 1) % self.batch_size == 0) or ((scene_i + 1) == len(scenes)):
                 ## Construct Batch
                 batch_scene = np.concatenate(batch_scene, axis=1)
-                batch_scene_goal = np.concatenate(batch_scene_goal, axis=0)
                 batch_split = np.cumsum(batch_split)
                 
                 batch_scene = torch.Tensor(batch_scene).to(self.device)
-                batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
+                
+                batch_scene_goal = self.goalModel(batch_scene, batch_split).to(self.device)
                 
                 loss_val_batch, loss_test_batch = self.val_batch(batch_scene, batch_scene_goal, batch_split)
                 val_loss += loss_val_batch
@@ -663,7 +647,7 @@ def main(epochs=25):
                       batch_size=args.batch_size, obs_length=args.obs_length, pred_length=args.pred_length,
                       augment=args.augment, normalize_scene=args.normalize_scene, save_every=args.save_every,
                       start_length=args.start_length, val_flag=val_flag, goalModel_path=args.goalModel_path)
-    trainer.loop(train_scenes, val_scenes, train_goals, val_goals, args.output, epochs=args.epochs, start_epoch=start_epoch)
+    trainer.loop(train_scenes, val_goals, args.output, epochs=args.epochs, start_epoch=start_epoch)
 
 
 if __name__ == '__main__':
