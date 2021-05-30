@@ -13,6 +13,7 @@ import copy
 import numpy as np
 
 import torch
+import torch.nn as nn
 import trajnetplusplustools
 
 from .. import augmentation
@@ -22,7 +23,7 @@ from .. import __version__ as VERSION
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, L2_goals_Loss, prepare_goals_data, goalPredictor, get_goals
+from .goals import goalModel, prepare_goals_data, goalPredictor, get_goals
 
 
 class GoalsTrainer(object):
@@ -35,7 +36,7 @@ class GoalsTrainer(object):
         self.lr_scheduler = lr_scheduler if lr_scheduler is not None else \
                               torch.optim.lr_scheduler.StepLR(optimizer, 10)
                               
-        self.criterion = criterion if criterion is not None else L2_goals_Loss()
+        self.criterion = criterion if criterion is not None else nn.MSELoss(reduction='none')
         self.device = device if device is not None else torch.device('cpu')
         self.model = self.model.to(self.device)
         self.criterion = self.criterion.to(self.device)
@@ -82,7 +83,7 @@ class GoalsTrainer(object):
         Parameters
         ----------
         inputs : Tensor [batch_size, k, 2]
-            Predicted goals of primary actor.
+            Predicted multiple goals of primary actor.
         target : Tensor [batch_size, 2]
             Groundtruth goal coordinates of primary pedestrians of each scene
         
@@ -96,7 +97,7 @@ class GoalsTrainer(object):
         target = target[:, None, :]
         
         # Loss per goal (criterion should be eg. L2norm)
-        goal_loss = self.criterion(inputs, target)
+        goal_loss = self.criterion(inputs, target) # broadcasting (batch_size, k, 2)
         
         loss = torch.min(goal_loss, dim=1)
         loss = torch.sum(loss)
