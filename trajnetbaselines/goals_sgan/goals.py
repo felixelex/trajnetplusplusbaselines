@@ -182,3 +182,59 @@ def prepare_goals_data(path, subset='/train/', sample=1.0):
         all_scenes += scene
 
     return all_scenes, True
+
+
+class goalLoss(torch.nn.Module):
+    def __init__(self, keep_batch_dim=False):
+        super(goalLoss, self).__init__()
+        self.keep_batch_dim = keep_batch_dim
+        
+    def forward(self, goal_pred, goal_gt):
+        """"Forward function calculating the loss.
+        
+        Parameters
+        ----------
+        goal_pred: Tensor [batch_size, k, 2]
+            Contains the k predicted goals per scene
+        goal_gt: Tensor [batch_size, 2]
+            Containts the goal ground truth
+        
+        Returns
+        -------
+        loss: Tensor [1,]
+            L2-norm variety loss
+        """
+        loss = self.L2_variety_loss(goal_pred, goal_gt)
+        
+        if self.keep_batch_dim:
+            return loss
+        else:
+            return loss.sum()
+        
+    def L2_variety_loss(self, pred, gt):
+        L2 = self.L2norm(pred, gt)
+        loss, _ = torch.min(L2, dim=1)
+        return loss
+
+    def L2norm(self, pred, gt):
+        """Calculation of L2-norm of inputs.
+        
+        Parameters
+        ----------
+        pred: Tensor [batch_size, modes, dim]
+            Contains predictions
+        gt: Tensor [batch_size, dim]
+            Containts the ground truth
+        
+        Returns
+        -------
+        loss: Tensor [batch_size, modes]
+            L2 norm, modewise
+        """
+        
+        gt = gt[:,None,:]
+        
+        L2 = (pred - gt).norm(p=2, dim=2)
+        
+        assert L2.shape == pred.shape[:-1], "Size missmatch"
+        return L2

@@ -23,11 +23,11 @@ from .. import __version__ as VERSION
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, prepare_goals_data, goalPredictor, get_goals
+from .goals import goalModel, prepare_goals_data, goalPredictor, get_goals, goalLoss
 
 
 class GoalsTrainer(object):
-    def __init__(self, model=None, optimizer=None, lr_scheduler=None, criterion=None, device = None, batch_size=8, 
+    def __init__(self, model=None, optimizer=None, lr_scheduler=None, device = None, batch_size=8, 
                  obs_length=9, pred_length=12, augment=True, normalize_scene=False, save_every=1, start_length=0, 
                  val_flag=True):
         self.model = model if model is not None else goalModel()
@@ -36,7 +36,7 @@ class GoalsTrainer(object):
         self.lr_scheduler = lr_scheduler if lr_scheduler is not None else \
                               torch.optim.lr_scheduler.StepLR(optimizer, 10)
                               
-        self.criterion = criterion if criterion is not None else nn.MSELoss(reduction='none')
+        self.criterion = goalLoss()
         self.device = device if device is not None else torch.device('cpu')
         self.model = self.model.to(self.device)
         self.criterion = self.criterion.to(self.device)
@@ -77,31 +77,31 @@ class GoalsTrainer(object):
         for param_group in self.optimizer.param_groups:
             return param_group['lr']
         
-    def goal_variety_loss(self, inputs, target):
-        """ Variety loss calculation for goalModel
+    # def goal_variety_loss(self, inputs, target):
+    #     """ Variety loss calculation for goalModel
 
-        Parameters
-        ----------
-        inputs : Tensor [batch_size, k, 2]
-            Predicted multiple goals of primary actor.
-        target : Tensor [batch_size, 2]
-            Groundtruth goal coordinates of primary pedestrians of each scene
+    #     Parameters
+    #     ----------
+    #     inputs : Tensor [batch_size, k, 2]
+    #         Predicted multiple goals of primary actor.
+    #     target : Tensor [batch_size, 2]
+    #         Groundtruth goal coordinates of primary pedestrians of each scene
         
-        Returns
-        -------
-        loss : Tensor [1,]
-            variety loss
-        """
+    #     Returns
+    #     -------
+    #     loss : Tensor [1,]
+    #         variety loss
+    #     """
         
-        # Broadcasting target to right shape
-        target = target[:, None, :]
+    #     # Broadcasting target to right shape
+    #     target = target[:, None, :]
         
-        # Loss per goal (criterion should be eg. L2norm)
-        goal_loss = self.criterion(inputs, target) # broadcasting (batch_size, k, 2)
+    #     # Loss per goal (criterion should be eg. L2norm)
+    #     goal_loss = self.criterion(inputs, target) # broadcasting (batch_size, k, 2)
         
-        loss = torch.min(goal_loss, dim=1)
-        loss = torch.sum(loss)
-        return loss
+    #     loss = torch.min(goal_loss, dim=1)
+    #     loss = torch.sum(loss)
+    #     return loss
         
         
     def train(self, scenes, epoch):
@@ -157,6 +157,9 @@ class GoalsTrainer(object):
                 batch_scene = torch.Tensor(batch_scene).to(self.device)
                 batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
+
+                ## Select only goals of primary actor
+                batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
 
                 preprocess_time = time.time() - scene_start
 
@@ -275,8 +278,7 @@ class GoalsTrainer(object):
 
         goal_pred = self.model(batch_scene, batch_split, obs_len=self.obs_length)
         # goal_pred [num_scenes, k, out_dim=2]
-        loss = self.goal_variety_loss(goal_pred, goal_gt)
-        # loss = self.criterion(goal_pred, goal_gt)
+        loss = self.criterion(goal_pred, goal_gt)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -416,10 +418,7 @@ def main(epochs=15):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.step_size)
     start_epoch = 0
-    
-    # Loss Criterion
-    criterion = L2Loss()
-    
+        
     # train
     if args.load_state:
         # load pretrained model.
@@ -439,7 +438,7 @@ def main(epochs=15):
             start_epoch = checkpoint['epoch']
     
     #trainer
-    trainer = GoalsTrainer(model, optimizer=optimizer, lr_scheduler=lr_scheduler, device=args.device, criterion=criterion,
+    trainer = GoalsTrainer(model, optimizer=optimizer, lr_scheduler=lr_scheduler, device=args.device,
                       batch_size=args.batch_size, obs_length=args.obs_length, pred_length=args.pred_length,
                       augment=args.augment, normalize_scene=args.normalize_scene, save_every=args.save_every,
                       start_length=args.start_length, val_flag=val_flag)
