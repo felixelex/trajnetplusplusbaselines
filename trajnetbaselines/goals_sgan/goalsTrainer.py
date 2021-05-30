@@ -17,13 +17,12 @@ import torch.nn as nn
 import trajnetplusplustools
 
 from .. import augmentation
-from ..lstm.loss import PredictionLoss, L2Loss
 from .. import __version__ as VERSION
 
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, prepare_goals_data, goalPredictor, get_goals, goalLoss
+from .goals import goalModel, goalLoss, prepare_goals_data, get_goals
 
 
 class GoalsTrainer(object):
@@ -60,7 +59,7 @@ class GoalsTrainer(object):
                 state = {'epoch': epoch, 'state_dict': self.model.state_dict(),
                          'optimizer': self.optimizer.state_dict(),
                          'lr_scheduler': self.lr_scheduler.state_dict()}
-                goalPredictor(self.model).save(state, out + '.epoch{}'.format(epoch))
+                self.model.save(state, out + '.epoch{}'.format(epoch))
                         
             self.train(train_scenes, epoch)
             
@@ -70,8 +69,8 @@ class GoalsTrainer(object):
         state = {'epoch': epoch + 1, 'state_dict': self.model.state_dict(),
                  'optimizer': self.optimizer.state_dict(),
                  'lr_scheduler': self.lr_scheduler.state_dict()}
-        goalPredictor(self.model).save(state, out + '.epoch{}'.format(epoch + 1))
-        goalPredictor(self.model).save(state, out)
+        self.model.save(state, out + '.epoch{}'.format(epoch + 1))
+        self.model.save(state, out)
         
     def get_lr(self):
         for param_group in self.optimizer.param_groups:

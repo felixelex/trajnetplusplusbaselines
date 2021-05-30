@@ -64,58 +64,6 @@ class goalModel(torch.nn.Module):
         
         return output
 
-    
-class goalPredictor(object):
-    """ Class that is used to make predictions (eg. for validation or when creating the prediction)"""
-    def __init__(self, model):
-        self.model = model
-
-    def save(self, state, filename):
-        with open(filename, 'wb') as f:
-            torch.save(self, f)
-
-        # # during development, good for compatibility across API changes:
-        # # Save state for optimizer to continue training in future
-        with open(filename + '.state', 'wb') as f:
-            torch.save(state, f)
-
-    @staticmethod
-    def load(filename):
-        with open(filename, 'rb') as f:
-            return torch.load(f)
-
-    def __call__(self, paths, scene_goal, n_predict=12, modes=1, predict_all=True, obs_length=9, start_length=0, args=None):
-        
-        # TODO: This code has been copied from lstm.lstm. It needs to be understood and adapted for our purpose 
-        
-        # self.model.eval()
-        # with torch.no_grad():
-        #     xy = trajnetplusplustools.Reader.paths_to_xy(paths)
-        #     batch_split = [0, xy.shape[1]]
-
-        #     if args.normalize_scene:
-        #         xy, rotation, center, scene_goal = center_scene(xy, obs_length, goals=scene_goal)
-            
-        #     xy = torch.Tensor(xy)  #.to(self.device)
-        #     scene_goal = torch.Tensor(scene_goal) #.to(device)
-        #     batch_split = torch.Tensor(batch_split).long()
-
-        #     multimodal_goals = {}
-        #     for num_p in range(modes):
-        #         # _, output_scenes = self.model(xy[start_length:obs_length], scene_goal, batch_split, xy[obs_length:-1].clone())
-        #         _, output_scenes, _ = self.model(xy[start_length:obs_length], scene_goal, batch_split, n_predict=n_predict)
-        #         output_scenes = output_scenes.numpy()
-        #         if args.normalize_scene:
-        #             output_scenes = augmentation.inverse_scene(output_scenes, rotation, center)
-        #         output_primary = output_scenes[-n_predict:, 0]
-        #         output_neighs = output_scenes[-n_predict:, 1:]
-        #         ## Dictionary of predictions. Each key corresponds to one mode
-        #         multimodal_goals[num_p] = [output_primary, output_neighs]
-
-        ## Return Dictionary of predictions. Each key corresponds to one mode
-        return multimodal_goals
-
-
 
 def get_goals(scene, obs_length, pred_length):
     """ Given a scene, extract the goal from each actor. 
