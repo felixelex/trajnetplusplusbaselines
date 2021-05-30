@@ -64,6 +64,22 @@ class goalModel(torch.nn.Module):
         
         return output
 
+    def save(self, state, filename):
+        with open(filename, 'wb') as f:
+            torch.save(self, f)
+
+        # # during development, good for compatibility across API changes:
+        # # Save state for optimizer to continue training in future
+        with open(filename + '.state', 'wb') as f:
+            torch.save(state, f)
+
+    @staticmethod
+    def load(filename):
+        with open(filename, 'rb') as f:
+            return torch.load(f)
+
+
+
 
 def get_goals(scene, obs_length, pred_length):
     """ Given a scene, extract the goal from each actor. 
