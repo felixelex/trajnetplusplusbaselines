@@ -17,25 +17,26 @@ import torch.nn as nn
 import trajnetplusplustools
 
 from .. import augmentation
+from ..lstm.loss import PredictionLoss, L2Loss
 from .. import __version__ as VERSION
 
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, goalLoss, prepare_goals_data, get_goals
+from .goals import goalModel, prepare_goals_data, goalPredictor, get_goals
 
 
 class GoalsTrainer(object):
-    def __init__(self, model=None, optimizer=None, lr_scheduler=None, device = None, batch_size=8, 
+    def __init__(self, model=None, optimizer=None, lr_scheduler=None, criterion=None, device = None, batch_size=8, 
                  obs_length=9, pred_length=12, augment=True, normalize_scene=False, save_every=1, start_length=0, 
                  val_flag=True):
-        self.model = model if model is not None else goalModel()
+        self.model = model if model is not None else goalModel("???")
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(
                            model.parameters(), lr=1e-3, weight_decay=1e-4)
         self.lr_scheduler = lr_scheduler if lr_scheduler is not None else \
                               torch.optim.lr_scheduler.StepLR(optimizer, 10)
                               
-        self.criterion = goalLoss()
+        self.criterion = criterion if criterion is not None else nn.MSELoss(reduction='none')
         self.device = device if device is not None else torch.device('cpu')
         self.model = self.model.to(self.device)
         self.criterion = self.criterion.to(self.device)
@@ -59,7 +60,7 @@ class GoalsTrainer(object):
                 state = {'epoch': epoch, 'state_dict': self.model.state_dict(),
                          'optimizer': self.optimizer.state_dict(),
                          'lr_scheduler': self.lr_scheduler.state_dict()}
-                self.model.save(state, out + '.epoch{}'.format(epoch))
+                goalPredictor(self.model).save(state, out + '.epoch{}'.format(epoch))
                         
             self.train(train_scenes, epoch)
             
@@ -69,13 +70,39 @@ class GoalsTrainer(object):
         state = {'epoch': epoch + 1, 'state_dict': self.model.state_dict(),
                  'optimizer': self.optimizer.state_dict(),
                  'lr_scheduler': self.lr_scheduler.state_dict()}
-        self.model.save(state, out + '.epoch{}'.format(epoch + 1))
-        self.model.save(state, out)
+        goalPredictor(self.model).save(state, out + '.epoch{}'.format(epoch + 1))
+        goalPredictor(self.model).save(state, out)
         
     def get_lr(self):
         for param_group in self.optimizer.param_groups:
             return param_group['lr']
-              
+        
+    def goal_variety_loss(self, inputs, target):
+        """ Variety loss calculation for goalModel
+
+        Parameters
+        ----------
+        inputs : Tensor [batch_size, k, 2]
+            Predicted multiple goals of primary actor.
+        target : Tensor [batch_size, 2]
+            Groundtruth goal coordinates of primary pedestrians of each scene
+        
+        Returns
+        -------
+        loss : Tensor [1,]
+            variety loss
+        """
+        
+        # Broadcasting target to right shape
+        target = target[:, None, :]
+        
+        # Loss per goal (criterion should be eg. L2norm)
+        goal_loss = self.criterion(inputs, target) # broadcasting (batch_size, k, 2)
+        
+        loss = torch.min(goal_loss, dim=1)
+        loss = torch.sum(loss)
+        return loss
+        
         
     def train(self, scenes, epoch):
         start_time = time.time()
@@ -131,9 +158,6 @@ class GoalsTrainer(object):
                 batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
 
-                ## Select only goals of primary actor
-                batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
-
                 preprocess_time = time.time() - scene_start
 
                 ## Train Batch
@@ -146,7 +170,7 @@ class GoalsTrainer(object):
                 batch_scene_goal = []
                 batch_split = [0]
 
-            if (scene_i + 1) % (100*self.batch_size) == 0:
+            if (scene_i + 1) % (10*self.batch_size) == 0:
                 self.log.info({
                     'type': 'train',
                     'epoch': epoch, 'batch': scene_i, 'n_batches': len(scenes),
@@ -166,7 +190,7 @@ class GoalsTrainer(object):
         })
 
 
-    def val(self, scenes, epoch):
+    def val(self, scenes, goals, epoch):
         eval_start = time.time()
 
         val_loss = 0.0
@@ -182,9 +206,12 @@ class GoalsTrainer(object):
             # make new scene
             scene = trajnetplusplustools.Reader.paths_to_xy(paths)
 
-            ## get goals
-            scene_goal = get_goals(scene, self.obs_length, self.pred_length)
+            # TODO: extract goal from scene
             
+            # scene_goal = ....
+            
+            scene_goal = np.array(scene_goal)
+
             ## Drop Distant
             scene, mask = drop_distant(scene)
             scene_goal = scene_goal[mask]
@@ -207,9 +234,6 @@ class GoalsTrainer(object):
                 batch_scene = torch.Tensor(batch_scene).to(self.device)
                 batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
-                
-                ## Select only goals of primary actor
-                batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
                 
                 loss_val_batch, loss_test_batch = self.val_batch(batch_scene, batch_scene_goal, batch_split)
                 val_loss += loss_val_batch
@@ -278,10 +302,17 @@ class GoalsTrainer(object):
             Validation loss of the batch when groundtruth of neighbours
             is not provided
         """
+
+        observed = batch_scene[self.start_length:self.obs_length]
+        prediction_truth = batch_scene[self.obs_length:].clone()  ## CLONE
+        targets = batch_scene[self.obs_length:self.seq_length] - batch_scene[self.obs_length-1:self.seq_length-1]
         
         with torch.no_grad():
-            goal_pred = self.model(batch_scene, batch_split, obs_len=self.obs_length)
-            loss = self.criterion(goal_pred, batch_scene_goal)
+            rel_output_list, _, _, _ = self.model(observed, batch_scene_goal, batch_split,
+                                                  n_predict=self.pred_length, pred_length=self.pred_length)
+
+            ## top-k loss
+            loss = self.variety_loss(rel_output_list, targets, batch_split)
 
         return 0.0, loss.item()
     
@@ -328,7 +359,7 @@ def main(epochs=15):
     hyperparameters = parser.add_argument_group('hyperparameters')
     hyperparameters.add_argument('--lr', default=1e-3, type=float,
                                  help='initial learning rate')
-    hyperparameters.add_argument('--k', type=int, default=3,
+    hyperparameters.add_argument('--k', type=int, default=1,
                                  help='number of samples for variety loss')
     hyperparameters.add_argument('--step_size', default=10, type=int,
                                  help='step_size of lr scheduler')
@@ -342,7 +373,7 @@ def main(epochs=15):
 
     if not os.path.exists('OUTPUT_BLOCK/{}'.format(args.path)):
         os.makedirs('OUTPUT_BLOCK/{}'.format(args.path))
-    args.output = 'OUTPUT_BLOCK/{}/goalsModel.pkl'.format(args.path)
+    args.output = 'OUTPUT_BLOCK/{}/goalsModel_{}.pkl'.format(args.path, args.output)
     
     # configure logging
     from pythonjsonlogger import jsonlogger
@@ -384,7 +415,10 @@ def main(epochs=15):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.step_size)
     start_epoch = 0
-        
+    
+    # Loss Criterion
+    criterion = L2Loss()
+    
     # train
     if args.load_state:
         # load pretrained model.
@@ -404,7 +438,7 @@ def main(epochs=15):
             start_epoch = checkpoint['epoch']
     
     #trainer
-    trainer = GoalsTrainer(model, optimizer=optimizer, lr_scheduler=lr_scheduler, device=args.device,
+    trainer = GoalsTrainer(model, optimizer=optimizer, lr_scheduler=lr_scheduler, device=args.device, criterion=criterion,
                       batch_size=args.batch_size, obs_length=args.obs_length, pred_length=args.pred_length,
                       augment=args.augment, normalize_scene=args.normalize_scene, save_every=args.save_every,
                       start_length=args.start_length, val_flag=val_flag)

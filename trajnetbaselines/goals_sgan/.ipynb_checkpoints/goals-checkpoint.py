@@ -64,6 +64,12 @@ class goalModel(torch.nn.Module):
         
         return output
 
+    
+class goalPredictor(object):
+    """ Class that is used to make predictions (eg. for validation or when creating the prediction)"""
+    def __init__(self, model):
+        self.model = model
+
     def save(self, state, filename):
         with open(filename, 'wb') as f:
             torch.save(self, f)
@@ -78,6 +84,36 @@ class goalModel(torch.nn.Module):
         with open(filename, 'rb') as f:
             return torch.load(f)
 
+    def __call__(self, paths, scene_goal, n_predict=12, modes=1, predict_all=True, obs_length=9, start_length=0, args=None):
+        
+        # TODO: This code has been copied from lstm.lstm. It needs to be understood and adapted for our purpose 
+        
+        # self.model.eval()
+        # with torch.no_grad():
+        #     xy = trajnetplusplustools.Reader.paths_to_xy(paths)
+        #     batch_split = [0, xy.shape[1]]
+
+        #     if args.normalize_scene:
+        #         xy, rotation, center, scene_goal = center_scene(xy, obs_length, goals=scene_goal)
+            
+        #     xy = torch.Tensor(xy)  #.to(self.device)
+        #     scene_goal = torch.Tensor(scene_goal) #.to(device)
+        #     batch_split = torch.Tensor(batch_split).long()
+
+        #     multimodal_goals = {}
+        #     for num_p in range(modes):
+        #         # _, output_scenes = self.model(xy[start_length:obs_length], scene_goal, batch_split, xy[obs_length:-1].clone())
+        #         _, output_scenes, _ = self.model(xy[start_length:obs_length], scene_goal, batch_split, n_predict=n_predict)
+        #         output_scenes = output_scenes.numpy()
+        #         if args.normalize_scene:
+        #             output_scenes = augmentation.inverse_scene(output_scenes, rotation, center)
+        #         output_primary = output_scenes[-n_predict:, 0]
+        #         output_neighs = output_scenes[-n_predict:, 1:]
+        #         ## Dictionary of predictions. Each key corresponds to one mode
+        #         multimodal_goals[num_p] = [output_primary, output_neighs]
+
+        ## Return Dictionary of predictions. Each key corresponds to one mode
+        return multimodal_goals
 
 
 
@@ -146,57 +182,3 @@ def prepare_goals_data(path, subset='/train/', sample=1.0):
         all_scenes += scene
 
     return all_scenes, True
-
-
-class goalLoss(torch.nn.Module):
-    def __init__(self, keep_batch_dim=False):
-        super(goalLoss, self).__init__()
-        self.keep_batch_dim = keep_batch_dim
-        
-    def forward(self, goal_pred, goal_gt):
-        """"Forward function calculating the loss.
-        
-        Parameters
-        ----------
-        goal_pred: Tensor [batch_size, k, 2]
-            Contains the k predicted goals per scene
-        goal_gt: Tensor [batch_size, 2]
-            Containts the goal ground truth
-        
-        Returns
-        -------
-        loss: Tensor [1,]
-            L2-norm variety loss
-        """
-        loss = self.L2_variety_loss(goal_pred, goal_gt)
-        
-        if self.keep_batch_dim:
-            return loss
-        else:
-            return loss.sum()
-        
-    def L2_variety_loss(self, pred, gt):
-        L2 = self.L2norm(pred, gt)
-        loss, _ = torch.min(L2, dim=1)
-        return loss
-
-    def L2norm(self, pred, gt):
-        """Calculation of L2-norm of inputs.
-        
-        Parameters
-        ----------
-        pred: Tensor [batch_size, modes, dim]
-            Contains predictions
-        gt: Tensor [batch_size, dim]
-            Containts the ground truth
-        
-        Returns
-        -------
-        loss: Tensor [batch_size, modes]
-            L2 norm, modewise
-        """
-        
-        gt = gt[:,None,:]
-        L2 = (pred - gt).norm(p=2, dim=2)
-        assert L2.shape == pred.shape[:-1], "Size missmatch"
-        return L2
