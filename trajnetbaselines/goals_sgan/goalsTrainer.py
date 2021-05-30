@@ -253,14 +253,14 @@ class GoalsTrainer(object):
             'time': round(eval_time, 1),
         })
         
-    def train_batch(self, batch_scene, batch_scene_goal, batch_split):
+    def train_batch(self, batch_scene, goal_gt, batch_split):
         """Training of B batches in parallel, B : batch_size
 
         Parameters
         ----------
         batch_scene : Tensor [seq_length, num_tracks, 2]
             Tensor of batch of scenes.
-        batch_scene_goal : Tensor [num_tracks, 2]
+        goal_gt : Tensor [num_tracks, 2]
             Tensor of goals of each track in batch
         batch_split : Tensor [batch_size + 1]
             Tensor defining the split of the batch.
@@ -272,13 +272,9 @@ class GoalsTrainer(object):
             Training loss of the batch
         """
 
-        observed = batch_scene[self.start_length:self.obs_length].clone()
-        prediction_truth = batch_scene[self.obs_length:].clone()
-        targets = batch_scene[self.obs_length:self.seq_length] - batch_scene[self.obs_length-1:self.seq_length-1]
-
-        rel_output_list, outputs, scores_real, scores_fake = self.model(observed, batch_scene_goal, batch_split, prediction_truth,
-                                                                        pred_length=self.pred_length)
-        loss = self.criterion(rel_output_list, targets, batch_split, scores_fake, scores_real)
+        goal_pred = self.model(batch_scene, batch_split, obs_len=self.obs_length)
+        # goal_pred [num_scenes, k, out_dim=2]
+        loss = self.criterion(goal_pred, goal_gt)
 
         self.optimizer.zero_grad()
         loss.backward()
