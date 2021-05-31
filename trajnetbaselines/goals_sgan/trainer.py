@@ -154,13 +154,17 @@ class Trainer(object):
                     step_type = 'g'
                     g_steps_left -= 1
                     ## Train Batch
-                    loss = self.train_batch(batch_scene, batch_scene_goal, batch_split, step_type='g')
+                    loss = 0
+                    for i in range(batch_scene_goal.shape[1]):
+                        loss += self.train_batch(batch_scene, batch_scene_goal[:,i,:], batch_split, step_type='g')
 
                 elif d_steps_left > 0:
                     step_type = 'd'
                     d_steps_left -= 1
                     ## Train Batch
-                    loss = self.train_batch(batch_scene, batch_scene_goal, batch_split, step_type='d')
+                    loss = 0
+                    for i in range(batch_scene_goal.shape[1]):
+                        loss += self.train_batch(batch_scene, batch_scene_goal[:,i,:], batch_split, step_type='d')
 
                 epoch_loss += loss
                 total_time = time.time() - scene_start
