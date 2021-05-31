@@ -65,7 +65,6 @@ class Trainer(object):
         self.val_flag = val_flag
         
         # Initializing our goalModel
-        goal_model = goalModel()
         if goalModel_path == None:
             raise ValueError("Please specify location of trained goalModel.")
         else:

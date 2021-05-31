@@ -12,9 +12,11 @@ from .goals import goalModel
 
 
 ## Global variables
+sganModelPath = ''
 goalModelPath = 'OUTPUT_BLOCK/synth_data/goalsModel.pkl'
 dataPath = 'DATA_BLOCK/synth_data'
 obs_length = 9
+
 
 ## Load model
 with open(goalModelPath, 'rb') as f:
@@ -33,6 +35,7 @@ scene = np.array(scene)
 batch_split = torch.Tensor([0, scene.shape[1]])
 goals = goal_Model(torch.Tensor(scene), batch_split)
 goals = goals.detach().numpy()
+
 
 ## Plot
 for i in range(scene.shape[1]):
