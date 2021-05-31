@@ -3,7 +3,7 @@
 Milestone 3: Multimodal Predictions & TrajNet++ Challenge
 =========================================================
 
-In this third milestone, we implemented a **Social Generative Adversial Neetwork (SGAN)** model using the TrajNet++ benchmark. After that we thought of another way to forecast pedestrian trajecotries, which is predicting goals for the pedestrians and thus creating more diverse trajectory forecasting. `This paper <https://openaccess.thecvf.com/content/ACCV2020/papers/Dendorfer_Goal-GAN_Multimodal_Trajectory_Prediction_Based_on_Goal_Position_Estimation_ACCV_2020_paper.pdf>`_ helped us to understand the goal-GAN structure and both models are again evaluated in `this AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
+In this third milestone, we trained a **Social Generative Adversial Neetwork (SGAN)** model using the TrajNet++ benchmark. Trying to improve on these results, we thought of another way to forecast pedestrian trajecotries. `This paper <https://openaccess.thecvf.com/content/ACCV2020/papers/Dendorfer_Goal-GAN_Multimodal_Trajectory_Prediction_Based_on_Goal_Position_Estimation_ACCV_2020_paper.pdf>`_ discussing goal-GAN has been a big inspiration for us. Both, our goal-SGAN and the SGAN baseline model, have been evaluated in `the AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
 
 Generative Models
 -----------------
