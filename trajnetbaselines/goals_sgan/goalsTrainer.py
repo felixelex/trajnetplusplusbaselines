@@ -22,7 +22,7 @@ from .. import __version__ as VERSION
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, goalLoss, prepare_goals_data, get_goals
+from .goals import goalModel, goalLoss, prepare_goals_data, get_goals, interpolate_batch_scene
 
 
 class GoalsTrainer(object):
@@ -248,9 +248,12 @@ class GoalsTrainer(object):
         loss : scalar
             Training loss of the batch
         """
-
+        
+        seq_length = batch_scene.shape[0]
+        batch_scene = interpolate_batch_scene(batch_scene, seq_length)
+        
         goal_pred = self.model(batch_scene, obs_len=self.obs_length)
-        assert not goal_pred.isnan().any(), 'NaNs in goal_pred: {}'.format(goal_pred)
+        assert not goal_pred.isnan().any(), 'NaNs in goal_pred: \n{}'.format(goal_pred)
         print("It worked!")
         
         # goal_pred [num_tracks, k, out_dim=2]

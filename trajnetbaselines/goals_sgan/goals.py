@@ -61,7 +61,7 @@ class goalModel(torch.nn.Module):
         output = self.relu(self.linear1(hn))
         output = self.linear2(output)
         output = output.reshape(num_tracks, self.k, self.out_dim)
-                
+                        
         return output
 
     def save(self, state, filename):
@@ -198,3 +198,30 @@ class goalLoss(torch.nn.Module):
         L2 = (pred - gt).norm(p=2, dim=2)
         assert L2.shape == pred.shape[:-1], "Size missmatch"
         return L2
+    
+    
+def interpolate_batch_scene(batch_scene, seq_length):
+    """Find NaN's and replace them by interpolation."""
+        
+    if not batch_scene.isnan().any():
+        return batch_scene # all good with this batch
+    else:
+        mask = batch_scene.isnan()
+        ind = torch.vstack(torch.where(mask)).T #index of nans
+        for i in ind:
+            if (i[0] != 0) & (i[0] != seq_length-1):
+                ## Interpolate
+                prev = batch_scene[i[0]-1, i[1], i[2]]
+                next = batch_scene[i[0]+1, i[1], i[2]]
+                batch_scene[i[0], i[1], i[2]] = prev + (next-prev)/2
+            else:
+                ## Extrapolate
+                if i[0] == 0:
+                    next = batch_scene[1, i[1], i[2]]
+                    nextnext = batch_scene[2, i[1], i[2]]
+                    batch_scene[i[0], i[1], i[2]] = next - (nextnext - next)
+                else: # last one is nan
+                    prev = batch_scene[i[0]-1, i[1], i[2]]
+                    prevprev = batch_scene[i[0]-2, i[1], i[2]]
+                    batch_scene[i[0], i[1], i[2]] = prev - (prevprev - prev)
+        return batch_scene
