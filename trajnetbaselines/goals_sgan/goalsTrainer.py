@@ -132,7 +132,7 @@ class GoalsTrainer(object):
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
 
                 ## Select only goals of primary actor
-                batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
+#                 batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
 
                 preprocess_time = time.time() - scene_start
 
@@ -146,7 +146,7 @@ class GoalsTrainer(object):
                 batch_scene_goal = []
                 batch_split = [0]
 
-            if (scene_i + 1) % (100*self.batch_size) == 0:
+#             if (scene_i + 1) % (100*self.batch_size) == 0:
                 self.log.info({
                     'type': 'train',
                     'epoch': epoch, 'batch': scene_i, 'n_batches': len(scenes),
@@ -249,8 +249,8 @@ class GoalsTrainer(object):
             Training loss of the batch
         """
 
-        goal_pred = self.model(batch_scene, batch_split, obs_len=self.obs_length)
-        # goal_pred [num_scenes, k, out_dim=2]
+        goal_pred = self.model(batch_scene, obs_len=self.obs_length)
+        # goal_pred [num_tracks, k, out_dim=2]
         loss = self.criterion(goal_pred, goal_gt)
 
         self.optimizer.zero_grad()
@@ -280,7 +280,7 @@ class GoalsTrainer(object):
         """
         
         with torch.no_grad():
-            goal_pred = self.model(batch_scene, batch_split, obs_len=self.obs_length)
+            goal_pred = self.model(batch_scene, obs_len=self.obs_length)
             loss = self.criterion(goal_pred, batch_scene_goal)
 
         return 0.0, loss.item()

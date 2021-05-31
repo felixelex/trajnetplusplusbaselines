@@ -36,7 +36,7 @@ class goalModel(torch.nn.Module):
         self.linear2 = nn.Linear(hid_dim, out_dim*k)
          
    
-    def forward(self, batch_scene, batch_split, obs_len=9):
+    def forward(self, batch_scene, obs_len=9):
         """ Forward pass, we ignore the inner relation of a scene, take num_tracks as batch size.
         
         Parameters
@@ -49,18 +49,18 @@ class goalModel(torch.nn.Module):
         output: Tensor (num_tracks, k, out_dim=2)
         """
         # take the observations as input 
-        primary_tracks = batch_scene[:obs_len, batch_split[:-1].tolist()] # (obs_len, batch_size, 2)
+        observations = batch_scene[:obs_len] # (obs_len, num_tracks, 2)
         
         # encode
-        _, hn = self.lstm(primary_tracks) 
+        _, hn = self.lstm(observations) 
         
         # predict goals
-        batch_size = batch_split.shape[0]-1
-        hn = hn[0] # (num_layers, batch_size, hid_dim)
-        hn = hn.permute(1,0,2).reshape(batch_size, self.num_layers*self.hid_dim) # (batch_size, num_layers*hid_dim)
+        num_tracks = batch_scene.size()[1]
+        hn = hn[0] # (num_layers, num_tracks, hid_dim)
+        hn = hn.permute(1,0,2).reshape(num_tracks, self.num_layers*self.hid_dim) # (num_tracks, num_layers*hid_dim)
         output = self.relu(self.linear1(hn))
         output = self.linear2(output)
-        output = output.reshape(batch_size, self.k, self.out_dim)
+        output = output.reshape(num_tracks, self.k, self.out_dim)
         
         return output
 
@@ -77,8 +77,6 @@ class goalModel(torch.nn.Module):
     def load(filename):
         with open(filename, 'rb') as f:
             return torch.load(f)
-
-
 
 
 def get_goals(scene, obs_length, pred_length):

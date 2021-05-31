@@ -598,13 +598,13 @@ def main(epochs=25):
 
     # generator
     lstm_generator = LSTMGenerator(embedding_dim=args.coordinate_embedding_dim, hidden_dim=args.hidden_dim,
-                                   pool=pool, goal_flag=args.goals, goal_dim=args.goal_dim, noise_dim=args.noise_dim,
+                                   pool=pool, goal_flag=True, goal_dim=args.goal_dim, noise_dim=args.noise_dim,
                                    no_noise=args.no_noise, noise_type=args.noise_type)
 
     # discriminator
     lstm_discriminator = LSTMDiscriminator(embedding_dim=args.coordinate_embedding_dim,
                                            hidden_dim=args.hidden_dim, pool=copy.deepcopy(pool),
-                                           goal_flag=args.goals, goal_dim=args.goal_dim)
+                                           goal_flag=True, goal_dim=args.goal_dim)
 
     # GAN model
     model = SGAN(generator=lstm_generator, discriminator=lstm_discriminator, g_steps=args.g_steps,
