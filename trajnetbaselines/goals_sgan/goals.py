@@ -53,7 +53,7 @@ class goalModel(torch.nn.Module):
         
         # encode
         _, hn = self.lstm(observations) 
-        
+                
         # predict goals
         num_tracks = batch_scene.size()[1]
         hn = hn[0] # (num_layers, num_tracks, hid_dim)
@@ -61,7 +61,7 @@ class goalModel(torch.nn.Module):
         output = self.relu(self.linear1(hn))
         output = self.linear2(output)
         output = output.reshape(num_tracks, self.k, self.out_dim)
-        
+                
         return output
 
     def save(self, state, filename):

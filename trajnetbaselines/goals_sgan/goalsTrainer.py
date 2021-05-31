@@ -146,7 +146,7 @@ class GoalsTrainer(object):
                 batch_scene_goal = []
                 batch_split = [0]
 
-#             if (scene_i + 1) % (100*self.batch_size) == 0:
+            if (scene_i + 1) % (100*self.batch_size) == 0:
                 self.log.info({
                     'type': 'train',
                     'epoch': epoch, 'batch': scene_i, 'n_batches': len(scenes),
@@ -250,6 +250,9 @@ class GoalsTrainer(object):
         """
 
         goal_pred = self.model(batch_scene, obs_len=self.obs_length)
+        assert not goal_pred.isnan().any(), 'NaNs in goal_pred: {}'.format(goal_pred)
+        print("It worked!")
+        
         # goal_pred [num_tracks, k, out_dim=2]
         loss = self.criterion(goal_pred, goal_gt)
 
