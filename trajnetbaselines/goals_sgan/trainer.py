@@ -143,7 +143,7 @@ class Trainer(object):
                 batch_scene = torch.Tensor(batch_scene).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
                                 
-                batch_scene_goal = self.goalModel(batch_scene, batch_split).to(self.device)
+                batch_scene_goal = self.goalModel(batch_scene, self.obs_length).to(self.device)
 
                 preprocess_time = time.time() - scene_start
 
@@ -286,12 +286,12 @@ class Trainer(object):
 
         if step_type == 'g':
             self.g_optimizer.zero_grad()
-            loss.backward()
+            loss.backward(retain_graph=True)
             self.g_optimizer.step()
 
         else:
             self.d_optimizer.zero_grad()
-            loss.backward()
+            loss.backward(retain_graph=True)
             self.d_optimizer.step()
 
         return loss.item()
