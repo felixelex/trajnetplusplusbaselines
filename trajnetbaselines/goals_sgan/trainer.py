@@ -68,7 +68,7 @@ class Trainer(object):
         if goalModel_path == None:
             raise ValueError("Please specify location of trained goalModel.")
         else:
-            goalModel_path = 'OUTPUT_BLOCK/{}'.format(goalModel_path)
+            goalModel_path = '{}'.format(goalModel_path)
             print("Loading goalModel Dict")
             with open(goalModel_path, 'rb') as f:
                 self.goalModel = torch.load(f)
