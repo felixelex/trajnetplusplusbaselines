@@ -5,6 +5,7 @@ import pickle
 
 import trajnetplusplustools
 
+from ..lstm.utils import center_scene
 
 class goalModel(torch.nn.Module):
     """ Model that learns predicting the goal destination of actors. As we are using multimodal SGAN, we also need multimodal goals.
@@ -225,3 +226,59 @@ def interpolate_batch_scene(batch_scene, seq_length):
                     prevprev = batch_scene[i[0]-2, i[1], i[2]]
                     batch_scene[i[0], i[1], i[2]] = prev - (prevprev - prev)
         return batch_scene
+    
+class goalSGANPredictor(object):
+    def __init__(self, goalModel, SGANModel):
+        self.goalModel = goalModel
+        self.SGANModel = SGANModel
+        
+    def save(self, state, filename):
+        with open(filename, 'wb') as f:
+            torch.save(state, f)
+            
+        with open(filename + '.state', 'wb') as f:
+            torch.save(state, f)
+            
+    @staticmethod
+    def load(filename):
+        with open(filename, 'rb') as f:
+            return torch.load(f)
+        
+    def __call__(self, paths, n_predict=12, SGAN_modes=1, predict_all=True, obs_length=9, start_length=0, args=None):
+        self.goalModel.eval()
+        self.SGANModel.eval()
+        
+        if SGAN_modes is not None:
+            self.SGANModel.k = SGAN_modes
+            
+        with torch.no_grad():
+            xy = trajnetplusplustools.Reader.paths_to_xy(paths)
+            batch_split = [0, xy.shape[1]]
+            
+        if args.normalize_scene:
+                xy, rotation, center, _ = center_scene(xy, obs_length)   
+                
+        xy = torch.Tensor(xy)  #.to(self.device)
+        batch_split = torch.Tensor(batch_split).long()
+                
+        ## Goal predictions
+        goals = self.goalModel(batch_scene=xy)
+        
+        ## Trajectory predictions
+        for i in range(goals.shape[1]): #Iterating over predicted goals
+            goal = goals[:,i,:]
+            
+            _, outputs, _, _ = self.SGANModel(xy[:obs_length], goal, batch_split, n_predict=n_predict)
+            
+            #TODO: FINISH THIS FUNCTION
+            
+            
+        return multimodal_outputs
+                
+                
+                
+                
+                
+                
+                
+                
