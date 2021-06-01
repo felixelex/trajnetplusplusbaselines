@@ -2,14 +2,16 @@ import torch
 import torch.nn as nn
 import os
 import pickle
-
+import numpy as np
 import trajnetplusplustools
+
+from ..lstm.modules import InputEmbedding
 
 
 class goalModel(torch.nn.Module):
     """ Model that learns predicting the goal destination of actors. As we are using multimodal SGAN, we also need multimodal goals.
     During training, the ground truth can be used to calculate the loss. """
-    def __init__(self, in_dim=2, hid_dim=32, num_layers=2, out_dim=2, k=3):
+    def __init__(self, emb_dim=32, in_dim=2, hid_dim=64, out_dim=2, k=3):
         """Initialization 
         
         Parameters
@@ -23,19 +25,35 @@ class goalModel(torch.nn.Module):
         # TODO: Write this class with all necessary functions
         
         # parameters 
+        self.emb_dim = emb_dim
         self.in_dim = in_dim
         self.hid_dim = hid_dim
-        self.num_layers = num_layers
         self.out_dim = out_dim
         self.k = k       
         
-        # layers 
-        self.lstm = nn.LSTM(in_dim, hid_dim, num_layers=num_layers)
-        self.linear1 = nn.Linear(hid_dim*num_layers, hid_dim)
-        self.relu = nn.ReLU()
-        self.linear2 = nn.Linear(hid_dim, out_dim*k)
+        # layers
+        self.input_embedding = InputEmbedding(in_dim, emb_dim, 4.0)
+        self.encoder = nn.LSTMCell(emb_dim, hid_dim)
+        self.decoder = nn.LSTMCell(emb_dim, hid_dim)
+        self.linear = nn.Linear(hid_dim, out_dim*k)
          
-   
+    def step(self, lstm, hidden_cell_state, obs):
+        num_tracks = obs.shape[1]
+        # consider only the hidden states of pedestrains present in scene
+        track_mask = (torch.isnan(obs[:,0]) == 0)
+        
+        # masked hidden cell state
+        hidden_cell_stacked = [
+            torch.stack([h for m, h in zip(track_mask, hidden_cell_state[0]) if m], dim=0),
+            torch.stack([h for m, h in zip(track_mask, hidden_cell_state[1]) if m], dim=0),
+        ]
+        
+        # mask embed
+        input_emb = self.input_embedding(obs[track_mask])
+        
+        hidden_cell_state = lstm(input_emb, hidden_cell_stacked)
+        return hidden_cell_state
+
     def forward(self, batch_scene, obs_len=9):
         """ Forward pass, we ignore the inner relation of a scene, take num_tracks as batch size.
         
@@ -51,18 +69,19 @@ class goalModel(torch.nn.Module):
         # take the observations as input 
         observations = batch_scene[:obs_len] # (obs_len, num_tracks, 2)
         
-        # encode
-        _, hn = self.lstm(observations) 
-                
-        # predict goals
-        num_tracks = batch_scene.size()[1]
-        hn = hn[0] # (num_layers, num_tracks, hid_dim)
-        hn = hn.permute(1,0,2).reshape(num_tracks, self.num_layers*self.hid_dim) # (num_tracks, num_layers*hid_dim)
-        output = self.relu(self.linear1(hn))
-        output = self.linear2(output)
-        output = output.reshape(num_tracks, self.k, self.out_dim)
-                        
-        return output
+        _, num_tracks, num_coor = observations.shape
+        hidden_cell_state = (torch.zeros((num_tracks, self.hid_dim)), 
+                             torch.zeros((num_tracks, self.hid_dim)))
+        # encoder
+        for t in range(obs_len):
+            hidden_cell_state = self.step(self.encoder, hidden_cell_state, observations[t])
+            
+        # decoder
+        go = torch.zeros((num_tracks, num_coor))
+        hidden_cell_state = self.step(self.decoder, hidden_cell_state, go)
+        
+        output = self.linear(hidden_cell_state[0])
+        return output.reshape(-1, self.k, self.out_dim)
 
     def save(self, state, filename):
         with open(filename, 'wb') as f:
@@ -200,14 +219,15 @@ class goalLoss(torch.nn.Module):
         return L2
     
     
-def interpolate_batch_scene(batch_scene, seq_length):
+def interpolate_batch_scene(batch_scene):
     """Find NaN's and replace them by interpolation."""
         
-    if not batch_scene.isnan().any():
+    if not np.isnan(batch_scene).any():
         return batch_scene # all good with this batch
     else:
-        mask = batch_scene.isnan()
-        ind = torch.vstack(torch.where(mask)).T #index of nans
+        mask = np.isnan(batch_scene)
+        ind = np.vstack(np.where(mask)).T #index of nans
+        seq_length = batch_scene.shape[0]
         for i in ind:
             if (i[0] != 0) & (i[0] != seq_length-1):
                 ## Interpolate
@@ -225,3 +245,21 @@ def interpolate_batch_scene(batch_scene, seq_length):
                     prevprev = batch_scene[i[0]-2, i[1], i[2]]
                     batch_scene[i[0], i[1], i[2]] = prev - (prevprev - prev)
         return batch_scene
+    
+    
+if __name__ == '__main__':
+
+    print('create data')
+    batch_scene = torch.empty(21,40,2).uniform_(0,1)
+    batch_scene[-1,1,:] = np.nan
+    print(torch.isnan(batch_scene).sum().item())
+    
+    batch_split = torch.Tensor([0,5,9,15,20,22,30,33,40])
+    targets = torch.ones(40,2)
+
+    print('create model')
+    model = goalModel()
+
+    print('forward pass')
+    output = model(batch_scene)
+    print("{} nan in output \n{}".format(torch.isnan(output).sum().item(), output))
