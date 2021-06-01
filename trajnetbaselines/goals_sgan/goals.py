@@ -51,6 +51,7 @@ class goalModel(torch.nn.Module):
         # mask embed
         input_emb = self.input_embedding(obs[track_mask])
         
+#         print(hidden_cell_state[0].shape, obs.shape, hidden_cell_stacked[0].shape, input_emb.shape)
         hidden_cell_state = lstm(input_emb, hidden_cell_stacked)
         return hidden_cell_state
 
@@ -175,9 +176,9 @@ class goalLoss(torch.nn.Module):
         
         Parameters
         ----------
-        goal_pred: Tensor [batch_size, k, 2]
+        goal_pred: Tensor [num_tracks, k, 2]
             Contains the k predicted goals per scene
-        goal_gt: Tensor [batch_size, 2]
+        goal_gt: Tensor [num_tracks, 2]
             Containts the goal ground truth
         
         Returns
@@ -185,7 +186,11 @@ class goalLoss(torch.nn.Module):
         loss: Tensor [1,]
             L2-norm variety loss
         """
-        loss = self.L2_variety_loss(goal_pred, goal_gt)
+        # mask true goals
+        track_mask = (torch.isnan(goal_gt[:,0]) == 0)
+        
+        loss = self.L2_variety_loss(goal_pred[track_mask], 
+                                    goal_gt[track_mask])
         
         if self.keep_batch_dim:
             return loss

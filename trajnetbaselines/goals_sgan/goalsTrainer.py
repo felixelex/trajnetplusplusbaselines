@@ -22,7 +22,7 @@ from .. import __version__ as VERSION
 from .sgan import drop_distant
 from ..lstm.utils import center_scene, random_rotation
 
-from .goals import goalModel, goalLoss, prepare_goals_data, get_goals, interpolate_batch_scene
+from .goals import goalModel, goalLoss, prepare_goals_data, get_goals
 
 
 class GoalsTrainer(object):
@@ -130,9 +130,6 @@ class GoalsTrainer(object):
                 batch_scene = torch.Tensor(batch_scene).to(self.device)
                 batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
-
-                ## Select only goals of primary actor
-#                 batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
 
                 preprocess_time = time.time() - scene_start
 
@@ -250,7 +247,7 @@ class GoalsTrainer(object):
         """
         
         seq_length = batch_scene.shape[0]
-        batch_scene = interpolate_batch_scene(batch_scene, seq_length)
+        print('{} nan in batch_scene'.format(torch.isnan(batch_scene).sum().item()))
         
         # assert not batch_scene.isnan().any(), 'NaNs in batch_scene'
         goal_pred = self.model(batch_scene, obs_len=self.obs_length)
