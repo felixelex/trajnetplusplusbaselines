@@ -205,9 +205,6 @@ class GoalsTrainer(object):
                 batch_scene_goal = torch.Tensor(batch_scene_goal).to(self.device)
                 batch_split = torch.Tensor(batch_split).to(self.device).long()
                 
-                ## Select only goals of primary actor
-                batch_scene_goal = batch_scene_goal[batch_split[:-1],:]
-                
                 loss_val_batch, loss_test_batch = self.val_batch(batch_scene, batch_scene_goal, batch_split)
                 val_loss += loss_val_batch
                 test_loss += loss_test_batch
