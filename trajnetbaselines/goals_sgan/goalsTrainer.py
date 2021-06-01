@@ -252,7 +252,7 @@ class GoalsTrainer(object):
         seq_length = batch_scene.shape[0]
         batch_scene = interpolate_batch_scene(batch_scene, seq_length)
         
-        assert not batch_scene.isnan().any(), 'NaNs in batch_scene'
+        # assert not batch_scene.isnan().any(), 'NaNs in batch_scene'
         goal_pred = self.model(batch_scene, obs_len=self.obs_length)
         assert not goal_pred.isnan().any(), 'NaNs in goal_pred: \n{}'.format(goal_pred)
         
@@ -261,6 +261,7 @@ class GoalsTrainer(object):
 
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1e+2)
         self.optimizer.step()
 
         return loss.item()
