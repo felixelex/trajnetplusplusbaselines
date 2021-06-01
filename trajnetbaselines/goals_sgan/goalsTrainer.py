@@ -245,14 +245,14 @@ class GoalsTrainer(object):
         loss : scalar
             Training loss of the batch
         """
-        
         seq_length = batch_scene.shape[0]
-        print('{} nan in batch_scene'.format(torch.isnan(batch_scene).sum().item()))
-        
+#         if torch.isnan(batch_scene).sum().item() != 0:
+#             print('{} nan in batch_scene'.format(torch.isnan(batch_scene).sum().item()))
+
         # assert not batch_scene.isnan().any(), 'NaNs in batch_scene'
         goal_pred = self.model(batch_scene, obs_len=self.obs_length)
         assert not goal_pred.isnan().any(), 'NaNs in goal_pred: \n{}'.format(goal_pred)
-        
+
         # goal_pred [num_tracks, k, out_dim=2]
         loss = self.criterion(goal_pred, goal_gt)
 

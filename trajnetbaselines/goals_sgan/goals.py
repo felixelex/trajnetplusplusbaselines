@@ -38,7 +38,6 @@ class goalModel(torch.nn.Module):
         self.linear = nn.Linear(hid_dim, out_dim*k)
          
     def step(self, lstm, hidden_cell_state, obs):
-        num_tracks = obs.shape[1]
         # consider only the hidden states of pedestrains present in scene
         track_mask = (torch.isnan(obs[:,0]) == 0)
         
@@ -51,9 +50,17 @@ class goalModel(torch.nn.Module):
         # mask embed
         input_emb = self.input_embedding(obs[track_mask])
         
-#         print(hidden_cell_state[0].shape, obs.shape, hidden_cell_stacked[0].shape, input_emb.shape)
-        hidden_cell_state = lstm(input_emb, hidden_cell_stacked)
-        return hidden_cell_state
+        # forward
+        hidden_cell_stacked = lstm(input_emb, hidden_cell_stacked)
+        
+        # unmask
+        mask_index = [i for i, m in enumerate(track_mask) if m]
+        hidden_cell = (hidden_cell_state[0].clone(), hidden_cell_state[1].clone())
+        for i, h, c in zip(mask_index, hidden_cell_stacked[0], hidden_cell_stacked[1]):
+            hidden_cell[0][i] = h
+            hidden_cell[1][i] = c
+        
+        return hidden_cell
 
     def forward(self, batch_scene, obs_len=9):
         """ Forward pass, we ignore the inner relation of a scene, take num_tracks as batch size.
@@ -69,6 +76,8 @@ class goalModel(torch.nn.Module):
         """
         # take the observations as input 
         observations = batch_scene[:obs_len] # (obs_len, num_tracks, 2)
+#         if observations.isnan().sum().item() != 0:
+#             print("{} nan in observations".format(observations.isnan().sum().item()))
         
         _, num_tracks, num_coor = observations.shape
         hidden_cell_state = (torch.zeros((num_tracks, self.hid_dim)), 
