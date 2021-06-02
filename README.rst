@@ -56,7 +56,7 @@ In order to use the goal model introduced above, we implemented some changes on 
 Results
 --------
 
-As a benchmark we used the SGAN model available on trajnet++. We trained a single mode (k = 1) SGAN model for 50 epochs on both data set (real and synthetic data). It was very time consuming and therefore we decided to reduce the number of epochs on 25 for the training of the multimode (k = 3) SGAN model. Even with 25 epochs the training could not finish on the synthetic data set, therefore we changed the parameters and trained only for 5 epochs and we set the discriminator step to 0 (d_steps =0). The predictions for real and synthetic data were then uploaded to AI-crowd and the performance of the models is shown in the table below. 
+As a benchmark we used the SGAN model available on trajnet++. We trained a single mode (k = 1) SGAN model for 50 epochs on both data set (real and synthetic data). It was very time consuming and therefore we decided to reduce the number of epochs on 25 for the training of the multimode (k = 3) SGAN model. Even with 25 epochs the training could not finish on the synthetic data set, therefore we changed the parameters and trained for only 5 epochs with discriminator step to be 0 (d_steps = 0). The predictions for real and synthetic data were then uploaded to AI-crowd and the performance of the models is shown in the table below. 
 
 These are the links to our AI-crowd submission for: 
     - `single mode <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/142535>`_
@@ -319,17 +319,17 @@ Overall results analysis
 
 Models trained on **five_parallel_synth (fps)** data
 
-.. figure:: trained_models/five_parallel_synth/Results_cropped.png
+.. figure:: trained_models/Milestone1/five_parallel_synth/Results_cropped.png
   :width: 400
 
 Models trained on **synth_data (sd)** data
 
-.. figure:: trained_models/synth_data/Results_cropped.png
+.. figure:: trained_models/Milestone1/synth_data/Results_cropped.png
   :width: 400
 
 Models trained on **real_data_noCFF (rd)** data
 
-.. figure:: trained_models/real_data_noCFF/Results_cropped.png
+.. figure:: trained_models/Milestone1/real_data_noCFF/Results_cropped.png
   :width: 400 
 
 **Metrics:** 
