@@ -378,7 +378,7 @@ def main(epochs=15):
     train_scenes, _ = prepare_goals_data(args.path, subset='/train/', sample=args.sample)
     val_scenes, val_flag = prepare_goals_data(args.path, subset='/val/', sample=args.sample)
         
-    # Goal model (TO BE MODIFIED)
+    # Goal model
     model = goalModel(in_dim=2, out_dim=2, k=args.k)
     
     # Optimizer and Scheduler
