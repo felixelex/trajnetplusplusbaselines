@@ -24,7 +24,7 @@ The training is done seperatly for the goal model and the trajectory (SGAN) mode
 
 .. raw:: html
 
-    <img src="trained_models/Milestone3/figures/approach_cropped.jpg" width="600px">
+    <img src="trained_models/Milestone3/figures/approach_cropped.jpg" width="800px">
 
 Goal Model
 ----------
