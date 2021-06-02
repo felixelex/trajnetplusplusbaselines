@@ -22,6 +22,10 @@ The overall idea has been visualized by Dendorfer et al.:
 
 The training is done seperatly for the goal model and the trajectory (SGAN) model. The goal model uses the the observed trajectories as input, while it's output is compared against the true final coordinates of each actor. The SGAN model is using the observed trajectories and the goal coordiantes as inputs, and returns the coorinates of the primary actor trajectory (during prediction).
 
+.. raw:: html
+
+    <img src="trained_models/Milestone3/figures/approach_cropped.jpg" width="800px">
+
 Goal Model
 ----------
 
