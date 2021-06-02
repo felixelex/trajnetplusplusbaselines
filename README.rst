@@ -8,31 +8,54 @@ In this third milestone, we trained a **Social Generative Adversial Neetwork (SG
 Generative Models
 -----------------
 
-Generative Models can generate diverse output, but they are often incapable to give realtistic are specially useful to capture the diverse set of possible trajectories, often called by multimodality. Given a past trajectory, there multiple possibilities of plausible future trajectories. In the method we want to apply, the possible destinations of a pedestrian shall be generated and give those plausible solutions. With that the chance that the model predicts at least one very good trajectory without collision is increased. 
-To visualize Dendorfer et al. have produced the following figure: 
+Generative Models can generate multimodal output, useful to capture the diverse possibilities of future trajectories. The basic idea is that given a past trajectory, there exist multiple possibilities for plausible future trajectories. In the method we want to apply, we use a two-stage process: In a first step we predict the final destination of each actor in a given scene (called goal). Than, in a second step, the goal coordinates are used to predict possible trajectories leading to these goals. Doing so, we hope to achieve good scores for the FDE without increasing the collision rate. 
+The overall idea has been visualized by Dendorfer et al.: 
 
 .. raw:: html
 
     <img src="trained_models/Milestone3/figures/Goal_GAN_dendorfer.png" width="600px">
 
-The training is done in two steps. First the goal model is trained on the dataset and then it is used in the sgan model to predict goals for the pedestrian. The trajectory forecasting is then done in the sgan model.
+The training is done seperatly for the goal model and the trajectory (SGAN) model. The goal model uses the the observed trajectories as input, while it's output is compared against the true final coordinates of each actor. The SGAN model is using the observed trajectories and the goal coordiantes as inputs, and returns the coorinates of the primary actor trajectory (during prediction).
 
 Goal Model
 ----------
 
-The goalModel consists of a LSTM network which predicts the goal destination of the primary pedestrian in the scene. During training the groundtruth is used to calculate the loss. We used the L2-norm variety loss for the goal trainer
+The goalModel consists of 2 LSTM layers + 1 lienar layer. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. 
 
+Two sample situations are shown below:
+
+.. raw:: html
+
+    <img src="trained_models/Milestone3/figures/TODO.png" width="600px">
+    
+
+.. raw:: html
+
+    <img src="trained_models/Milestone3/figures/TODO.png" width="600px">
 
 Goal Trainer
 ------------
 
-The goalsTrainer is used for the goalModel to predict the correct goals.
-For each scene, the goals of the primary pedestrian are selected and validated against the groundtruth.
+To train the goal model, we created a GoalsTrainer class. All code related to training and testing can be found in this file.
+
+SGAN model
+----------
+
+In order to use the goal model introduced above, we implemented some changes on the original SGAN model and the corresponding trainer class from the trajnet++ baseline. We decided to only use single-mode SGAN, in order to keep computational complexity during training at a reasonable level. 
 
 Results
 --------
     - SGAN single mode, multi mode (k=3) 
     - Goal-GAN
+
+
+
+
+
+
+
+
+
 
 
 
