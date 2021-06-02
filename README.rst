@@ -26,12 +26,12 @@ Two sample situations are shown below:
 
 .. raw:: html
 
-    <img src="trained_models/Milestone3/figures/goal_pred1.png" width="600px">
+    <img src="trained_models/Milestone3/figures/goal_pred1.jpeg" width="600px">
     
 
 .. raw:: html
 
-    <img src="trained_models/Milestone3/figures/goal_pred2.png" width="600px">
+    <img src="trained_models/Milestone3/figures/goal_pred2.jpeg" width="600px">
 
 Goal Trainer
 ------------
