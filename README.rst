@@ -5,29 +5,32 @@ Milestone 3: Multimodal Predictions & TrajNet++ Challenge
 
 In this third milestone, we trained a **Social Generative Adversial Network (SGAN)** model using the TrajNet++ benchmark. Trying to improve on these results, we thought of another way to forecast pedestrian trajecotries. `This paper <https://openaccess.thecvf.com/content/ACCV2020/papers/Dendorfer_Goal-GAN_Multimodal_Trajectory_Prediction_Based_on_Goal_Position_Estimation_ACCV_2020_paper.pdf>`_ discussing goal-GAN has been a big inspiration for us. Both, our goal-SGAN and the SGAN baseline model, have been evaluated in `the AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
 
-Implementation
---------------
 
-Our code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/tree/master/trajnetbaselines/goals_sgan>`_.
-
-Generative Models
+Social Generative Adversial Models with Goals Learning
 -----------------
 
-Generative Models can generate multimodal output, useful to capture the diverse possibilities of future trajectories. The basic idea is that given a past trajectory, there exist multiple possibilities for plausible future trajectories. There are usually two players: the generator and the discriminator. The generator is going to produce several trajectories and the discriminator will be judging if this the real trajectory (grorundtruth) or a fake trajectory. That way the generator is going to be trained to produce plausible trajectories. In the method we want to apply, we use a two-stage process: In a first step we predict the final destination of each actor in a given scene (called goal). Then, in a second step, the goal coordinates are used to predict possible trajectories leading to these goals. Doing so, we hope to achieve good scores for the FDE without increasing the collision rate. 
+Generative Models can generate multimodal output, useful to capture the diverse possibilities of future trajectories. The basic idea is that given a past trajectory, there exist multiple trajectories that are socially plausible. There are usually two players: the generator and the discriminator. In the application of neural motion models, the generator is going to produce several trajectories whereas the discriminator will be judging if this the real trajectory (grorundtruth) or a fake trajectory. That way the generator is going to be trained to produce plausible trajectories. 
+
+In the method we want to apply, we use a two-stage process: In a first step we predict the final destination of each actor in a given scene (called goal). Then, in a second step, the goal coordinates are used to predict possible trajectories leading to these goals. Doing so, we hope to achieve good scores for the FDE without increasing the collision rate. 
 The overall idea has been visualized by Dendorfer et al.: 
 
 .. raw:: html
 
     <img src="trained_models/Milestone3/figures/Goal_GAN_dendorfer.png" width="600px">
 
-The training is done separately for the goal model and the trajectory (SGAN) model. The goal model uses the the observed trajectories as input, while its output is compared against the true final coordinates of each actor. The SGAN model is using the observed trajectories and the goal coordiantes as inputs, and returns the coordinates of the primary actor trajectory (during prediction).
+The training is done separately for the goal model and the trajectory (SGAN) model. The goal model uses the observed trajectories as input, while its output is compared against the true final coordinates of each actor. The SGAN model is using the observed trajectories and the goal coordiantes as inputs, and returns the coordinates of the primary actor trajectory (during prediction).
 
 .. raw:: html
 
     <img src="trained_models/Milestone3/figures/approach_cropped.jpg" width="800px">
 
-Goal Model
-----------
+
+Implementation
+--------------
+
+Our code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/tree/master/trajnetbaselines/goals_sgan>`_.
+
+**Goal Model**
 
 The goalModel consists of 2 LSTM layers + 1 linear layer. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. The corresponding code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/goals.py>`_.
 
@@ -42,13 +45,11 @@ Two sample situations are shown below:
 
     <img src="trained_models/Milestone3/figures/goal_pred2.jpeg" width="450px">
 
-Goal Trainer
-------------
+**Goal Trainer**
 
 To train the goal model, we created a GoalsTrainer class. All code related to training and testing can be found in this `file <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/goalsTrainer.py>`_.
 
-SGAN model
-----------
+**SGAN model**
 
 In order to use the goal model introduced above, we implemented some changes on the original SGAN model and the corresponding trainer class from the trajnet++ baseline. We decided to only use single-mode SGAN, in order to keep computational complexity during training at a reasonable level. The modified SGAN model can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/sgan.py>`_.
 
