@@ -8,7 +8,7 @@ In this third milestone, we trained a **Social Generative Adversial Neetwork (SG
 Implementation
 --------------
 
-Our code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/tree/master/trajnetbaselines/goals_sgan>`.
+Our code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/tree/master/trajnetbaselines/goals_sgan>`_.
 
 Generative Models
 -----------------
