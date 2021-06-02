@@ -7,6 +7,7 @@ import trajnetplusplustools
 
 from ..lstm.modules import InputEmbedding
 from ..lstm.utils import center_scene
+from .. import augmentation
 
 class goalModel(torch.nn.Module):
     """ Model that learns predicting the goal destination of actors. As we are using multimodal SGAN, we also need multimodal goals.
@@ -302,8 +303,11 @@ class goalSGANPredictor(object):
         for i in range(goals.shape[1]): #Iterating over predicted goals
             goal = goals[:,i,:]
             
-            _, outputs, _, _ = self.SGANModel(xy[:obs_length], goal, batch_split, n_predict=n_predict)
+            _, output_scenes, _, _ = self.SGANModel(xy[:obs_length], goal, batch_split, n_predict=n_predict)
+            output_scenes = output_scenes.numpy()
             
+            if args.normalize_scene:
+                output_scenes = augmentation
             #TODO: FINISH THIS FUNCTION
             
             
