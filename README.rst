@@ -29,7 +29,7 @@ The training is done separately for the goal model and the trajectory (SGAN) mod
 Goal Model
 ----------
 
-The goalModel consists of 2 LSTM layers + 1 linear layer. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. 
+The goalModel consists of 2 LSTM layers + 1 linear layer. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. The corresponding code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/goals.py>`_.
 
 Two sample situations are shown below:
 
