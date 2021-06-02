@@ -3,7 +3,7 @@
 Milestone 3: Multimodal Predictions & TrajNet++ Challenge
 =========================================================
 
-In this third milestone, we trained a **Social Generative Adversial Neetwork (SGAN)** model using the TrajNet++ benchmark. Trying to improve on these results, we thought of another way to forecast pedestrian trajecotries. `This paper <https://openaccess.thecvf.com/content/ACCV2020/papers/Dendorfer_Goal-GAN_Multimodal_Trajectory_Prediction_Based_on_Goal_Position_Estimation_ACCV_2020_paper.pdf>`_ discussing goal-GAN has been a big inspiration for us. Both, our goal-SGAN and the SGAN baseline model, have been evaluated in `the AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
+In this third milestone, we trained a **Social Generative Adversial Network (SGAN)** model using the TrajNet++ benchmark. Trying to improve on these results, we thought of another way to forecast pedestrian trajecotries. `This paper <https://openaccess.thecvf.com/content/ACCV2020/papers/Dendorfer_Goal-GAN_Multimodal_Trajectory_Prediction_Based_on_Goal_Position_Estimation_ACCV_2020_paper.pdf>`_ discussing goal-GAN has been a big inspiration for us. Both, our goal-SGAN and the SGAN baseline model, have been evaluated in `the AICrowd challenge <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge>`_. 
 
 Implementation
 --------------
@@ -13,7 +13,7 @@ Our code can be found `here <https://github.com/felixelex/trajnetplusplusbaselin
 Generative Models
 -----------------
 
-Generative Models can generate multimodal output, useful to capture the diverse possibilities of future trajectories. The basic idea is that given a past trajectory, there exist multiple possibilities for plausible future trajectories. In the method we want to apply, we use a two-stage process: In a first step we predict the final destination of each actor in a given scene (called goal). Than, in a second step, the goal coordinates are used to predict possible trajectories leading to these goals. Doing so, we hope to achieve good scores for the FDE without increasing the collision rate. 
+Generative Models can generate multimodal output, useful to capture the diverse possibilities of future trajectories. The basic idea is that given a past trajectory, there exist multiple possibilities for plausible future trajectories. There are usually two players: the generator and the discriminator. The generator is going to produce several trajectories and the discriminator will be judging if this the real trajectory (grorundtruth) or a fake trajectory. That way the generator is going to be trained to produce plausible trajectories. In the method we want to apply, we use a two-stage process: In a first step we predict the final destination of each actor in a given scene (called goal). Then, in a second step, the goal coordinates are used to predict possible trajectories leading to these goals. Doing so, we hope to achieve good scores for the FDE without increasing the collision rate. 
 The overall idea has been visualized by Dendorfer et al.: 
 
 .. raw:: html
@@ -55,7 +55,7 @@ In order to use the goal model introduced above, we implemented some changes on 
 Results
 --------
 
-The benchmark is set with the SGAN model available on trajnet++. We trained a single mode (k = 1) SGAN model for 50 epochs on both data set (real and synthetic data). It was very time consuming and therefore we decided to reduce the number of epochs on 25 for the training of the multi mode (k = 3) SGAN model. Even with 25 epochs the training could not finish on the synthetic data set, therefore we changed the parameters and trained only for 5 epochs and we set the discriminator step to 0 (d_step =0). The predictions for real and synthetic data were then uploaded to AI-crowd and the performance of the models is shown in the table below. 
+The benchmark is set with the SGAN model available on trajnet++. We trained a single mode (k = 1) SGAN model for 50 epochs on both data set (real and synthetic data). It was very time consuming and therefore we decided to reduce the number of epochs on 25 for the training of the multi mode (k = 3) SGAN model. Even with 25 epochs the training could not finish on the synthetic data set, therefore we changed the parameters and trained only for 5 epochs and we set the discriminator step to 0 (d_steps =0). The predictions for real and synthetic data were then uploaded to AI-crowd and the performance of the models is shown in the table below. 
 
 These are the links to our AI-crowd submission for: 
     - `single mode <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/142535>`_
