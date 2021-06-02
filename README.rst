@@ -20,7 +20,7 @@ The overall idea has been visualized by Dendorfer et al.:
 
     <img src="trained_models/Milestone3/figures/Goal_GAN_dendorfer.png" width="600px">
 
-The training is done seperatly for the goal model and the trajectory (SGAN) model. The goal model uses the the observed trajectories as input, while it's output is compared against the true final coordinates of each actor. The SGAN model is using the observed trajectories and the goal coordiantes as inputs, and returns the coorinates of the primary actor trajectory (during prediction).
+The training is done separately for the goal model and the trajectory (SGAN) model. The goal model uses the the observed trajectories as input, while its output is compared against the true final coordinates of each actor. The SGAN model is using the observed trajectories and the goal coordiantes as inputs, and returns the coordinates of the primary actor trajectory (during prediction).
 
 .. raw:: html
 
@@ -29,7 +29,7 @@ The training is done seperatly for the goal model and the trajectory (SGAN) mode
 Goal Model
 ----------
 
-The goalModel consists of 2 LSTM layers + 1 lienar layer. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. 
+The goalModel consists of 2 LSTM layers + 1 linear layer. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. 
 
 Two sample situations are shown below:
 
@@ -45,19 +45,36 @@ Two sample situations are shown below:
 Goal Trainer
 ------------
 
-To train the goal model, we created a GoalsTrainer class. All code related to training and testing can be found in this file.
+To train the goal model, we created a GoalsTrainer class. All code related to training and testing can be found in this `file <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/goalsTrainer.py>`_.
 
 SGAN model
 ----------
 
-In order to use the goal model introduced above, we implemented some changes on the original SGAN model and the corresponding trainer class from the trajnet++ baseline. We decided to only use single-mode SGAN, in order to keep computational complexity during training at a reasonable level. 
+In order to use the goal model introduced above, we implemented some changes on the original SGAN model and the corresponding trainer class from the trajnet++ baseline. We decided to only use single-mode SGAN, in order to keep computational complexity during training at a reasonable level. The modified SGAN model can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/sgan.py>`_.
 
 Results
 --------
-    - SGAN single mode, multi mode (k=3) 
-    - Goal-GAN
 
+The benchmark is set with the SGAN model available on trajnet++. We trained a single mode (k = 1) SGAN model for 50 epochs on both data set (real and synthetic data). It was very time consuming and therefore we decided to reduce the number of epochs on 25 for the training of the multi mode (k = 3) SGAN model. Even with 25 epochs the training could not finish on the synthetic data set, therefore we changed the parameters and trained only for 5 epochs and we set the discriminator step to 0 (d_step =0). The predictions for real and synthetic data were then uploaded to AI-crowd and the performance of the models is shown in the table below. 
 
+These are the links to our AI-crowd submission for: 
+    - `single mode <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/142535>`_
+    - `multi mode <https://www.aicrowd.com/challenges/trajnet-a-trajectory-forecasting-challenge/submissions/143629>`_
+
+    
++---+----------+--------+---------+------+-------+
+| k | data_set | epochs | d_steps | FDE  | Col-I |
++---+----------+--------+---------+------+-------+
+| 1 | real     | 50     | default | 1.25 | 5.97  |
++---+----------+--------+---------+------+-------+
+| 1 | synth    | 50     | default | 1.25 | 5.97  |
++---+----------+--------+---------+------+-------+
+| 3 | real     | 25     | default | 1.47 | 5.43  |
++---+----------+--------+---------+------+-------+
+| 3 | synth    | 5      | 0       | 1.47 | 5.43  |
++---+----------+--------+---------+------+-------+
+
+For the training of the Goal-GAN model, we trained the goalTrainer and the SGAN separately and the idea was to give them both as an input for the predictions. Unfortunately we hadn't enough time to implement this. And therefore we sadly don't have any results on the performance of the Goal-GAN model yet. 
 
 
 
