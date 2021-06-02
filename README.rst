@@ -32,7 +32,7 @@ Our code can be found `here <https://github.com/felixelex/trajnetplusplusbaselin
 
 **Goal Model**
 
-The goalModel consists of 2 LSTM layers + 1 linear layer. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. The corresponding code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/goals.py>`_.
+The goalModel consists of 1 input embedding layer + 2 LSTM layers + 1 linear layer. To deal with the NaN values, we also add a *track_mask* for the inputs and unmask them in the end, so it will consider only the hidden states of pedestrains present in scene. For each observed trajectory, we want the goal model to predict multiple possible goals. In order to encourage diversity between the different modes, we used L2-norm-variety-loss during training. The corresponding code can be found `here <https://github.com/felixelex/trajnetplusplusbaselines/blob/master/trajnetbaselines/goals_sgan/goals.py>`_.
 
 Two sample situations are shown below:
 
