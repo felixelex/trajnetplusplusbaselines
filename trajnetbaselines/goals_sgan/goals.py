@@ -299,7 +299,9 @@ class goalSGANPredictor(object):
         ## Goal predictions
         goals = self.goalModel(batch_scene=xy)
         
+        
         ## Trajectory predictions
+        multimodal_outputs = {}
         for i in range(goals.shape[1]): #Iterating over predicted goals
             goal = goals[:,i,:]
             
@@ -307,12 +309,17 @@ class goalSGANPredictor(object):
             output_scenes = output_scenes.numpy()
             
             if args.normalize_scene:
-                output_scenes = augmentation
-            #TODO: FINISH THIS FUNCTION
+                output_scenes = augmentation.inverse_scene(output_scenes, rotation, center)
             
+            output_primary = output_scenes[-n_predict:, 0]
+            output_neighs = output_scenes[-n_predict:, 1:]
             
+            if i == 0:
+                multimodal_outputs[i] = [output_primary, output_neighs]
+            else:
+                multimodal_outputs[i] = [output_primary, []]
+        ## Return Dictionary of predictions. Each key corresponds to one mode
         return multimodal_outputs
-                
                       
                 
 if __name__ == '__main__':
