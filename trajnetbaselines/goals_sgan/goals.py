@@ -7,6 +7,7 @@ import trajnetplusplustools
 
 from ..lstm.modules import InputEmbedding
 from ..lstm.utils import center_scene
+from .. import augmentation
 
 class goalModel(torch.nn.Module):
     """ Model that learns predicting the goal destination of actors. As we are using multimodal SGAN, we also need multimodal goals.
@@ -298,17 +299,27 @@ class goalSGANPredictor(object):
         ## Goal predictions
         goals = self.goalModel(batch_scene=xy)
         
+        
         ## Trajectory predictions
+        multimodal_outputs = {}
         for i in range(goals.shape[1]): #Iterating over predicted goals
             goal = goals[:,i,:]
             
-            _, outputs, _, _ = self.SGANModel(xy[:obs_length], goal, batch_split, n_predict=n_predict)
+            _, output_scenes, _, _ = self.SGANModel(xy[:obs_length], goal, batch_split, n_predict=n_predict)
+            output_scenes = output_scenes.numpy()
             
-            #TODO: FINISH THIS FUNCTION
+            if args.normalize_scene:
+                output_scenes = augmentation.inverse_scene(output_scenes, rotation, center)
             
+            output_primary = output_scenes[-n_predict:, 0]
+            output_neighs = output_scenes[-n_predict:, 1:]
             
+            if i == 0:
+                multimodal_outputs[i] = [output_primary, output_neighs]
+            else:
+                multimodal_outputs[i] = [output_primary, []]
+        ## Return Dictionary of predictions. Each key corresponds to one mode
         return multimodal_outputs
-                
                       
                 
 if __name__ == '__main__':
