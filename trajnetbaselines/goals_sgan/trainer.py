@@ -566,6 +566,8 @@ def main(epochs=25):
     train_scenes, train_goals, _ = prepare_data(args.path, subset='/train/', sample=args.sample, goals=args.goals)
     val_scenes, val_goals, val_flag = prepare_data(args.path, subset='/val/', sample=args.sample, goals=args.goals)
 
+    val_flag = False
+
     ## pretrained pool model (if any)
     pretrained_pool = None
 
